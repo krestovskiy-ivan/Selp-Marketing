@@ -1,0 +1,2087 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Selp.Market — Personal Tracker v5</title>
+<style>
+:root{
+  --bg:#08111f;
+  --bg2:#0b1220;
+  --panel:rgba(15,23,42,.94);
+  --card:rgba(17,24,39,.96);
+  --soft:#111827;
+  --line:#243247;
+  --line2:#334155;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --accent:#22c55e;
+  --accent2:#38bdf8;
+  --accent3:#a78bfa;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --done:#10b981;
+  --shadow:0 18px 40px rgba(0,0,0,.32);
+  --radius:22px;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(56,189,248,.12), transparent 22%),
+    radial-gradient(circle at top right, rgba(34,197,94,.12), transparent 22%),
+    linear-gradient(180deg,#07101d 0%, #0b1220 100%);
+  color:var(--text);
+}
+
+.wrap{max-width:1440px;margin:0 auto;padding:24px}
+.hero,.card,.mission,.table-wrap,.modal-box,.map-wrap,.chart-card,.timeline-card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.hero{padding:26px;margin-bottom:18px;position:relative;overflow:hidden}
+.hero:before{
+  content:"";
+  position:absolute;inset:-30%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(56,189,248,.08), transparent 18%),
+    radial-gradient(circle at 80% 40%, rgba(34,197,94,.07), transparent 18%),
+    radial-gradient(circle at 50% 80%, rgba(167,139,250,.07), transparent 16%);
+  pointer-events:none;
+}
+h1,h2,h3,h4,p{margin:0}
+.sub{color:var(--muted);margin-top:10px;line-height:1.5}
+.hero-grid{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;position:relative;z-index:1}
+.hero-right{display:grid;gap:12px}
+
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:18px}
+.card{padding:18px}
+.label{font-size:12px;color:var(--muted);margin-bottom:7px;letter-spacing:.02em}
+.value{font-size:28px;font-weight:800}
+.value.sm{font-size:20px}
+.spark{
+  margin-top:10px;height:8px;border-radius:999px;background:#0b1220;border:1px solid var(--line);overflow:hidden;
+}
+.spark>div{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{
+  min-height:46px;padding:12px 16px;
+  background:#122033;border:1px solid var(--line2);border-radius:14px;color:var(--text);
+  cursor:pointer;transition:.18s ease;
+}
+.tab:hover{transform:translateY(-1px);border-color:#4b5f79}
+.tab.active{background:linear-gradient(135deg,#0ea5e9,#2563eb);border:none}
+
+.toolbar{
+  display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:18px 0
+}
+.toolbar>*{min-height:46px}
+.search{flex:1;min-width:260px}
+
+input,select,textarea,button{
+  font:inherit;border-radius:14px;border:1px solid var(--line2);
+  background:#0b1220;color:var(--text);padding:11px 13px;
+}
+input[type="date"]{padding:10px 12px}
+textarea{width:100%;min-height:100px;resize:vertical}
+button{cursor:pointer;background:#172033;transition:.18s ease}
+button:hover{transform:translateY(-1px);border-color:#4b5f79}
+.btn-primary{background:linear-gradient(135deg,#16a34a,#22c55e);color:white;border:none}
+.btn-danger{background:#3b0d0d;border-color:#7f1d1d}
+.btn-soft{background:#0e1728}
+.btn-blue{background:linear-gradient(135deg,#0284c7,#2563eb);border:none}
+.hidden{display:none !important}
+
+.grid-main{display:grid;grid-template-columns:1.3fr .7fr;gap:18px}
+.missions{display:flex;flex-direction:column;gap:16px}
+.sidebar{display:flex;flex-direction:column;gap:16px}
+.sidebar .card{padding:16px}
+.kpi-grid,.dashboard-grid,.skins-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mission{padding:18px;background:linear-gradient(180deg, rgba(17,24,39,.98), rgba(10,17,29,.98))}
+.mission-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.phase{font-size:12px;color:var(--accent2);margin-bottom:4px}
+.title{font-size:22px;font-weight:800}
+.title-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{
+  font-size:12px;padding:7px 10px;border-radius:999px;border:1px solid var(--line2);background:#0b1220
+}
+.badge.done{border-color:#064e3b;color:#a7f3d0}
+.badge.work{border-color:#1d4ed8;color:#bfdbfe}
+.badge.block{border-color:#7f1d1d;color:#fecaca}
+.badge.warn{border-color:#92400e;color:#fde68a}
+.badge.priority-low{color:#cbd5e1}
+.badge.priority-medium{color:#93c5fd}
+.badge.priority-high{color:#facc15}
+.badge.priority-critical{color:#fca5a5}
+.progress{
+  height:12px;background:#0b1220;border-radius:999px;overflow:hidden;border:1px solid var(--line);margin:14px 0 16px
+}
+.progress>div{height:100%;background:linear-gradient(90deg,#22c55e,#38bdf8);width:0%}
+.mission-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.meta-box{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.task-list{display:flex;flex-direction:column;gap:10px}
+.task{
+  display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+  padding:12px;border:1px solid var(--line);border-radius:16px;background:#0b1220
+}
+.task.done .task-text{opacity:.55;text-decoration:line-through}
+.task.blocked{border-color:#6b2e2e;background:linear-gradient(180deg, rgba(57,19,19,.35), rgba(11,18,32,1))}
+.task-meta-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.task-text{line-height:1.4}
+.small{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px}
+.ok{color:#a7f3d0;border-color:#065f46}
+.warn{color:#fde68a;border-color:#92400e}
+.danger{color:#fecaca;border-color:#991b1b}
+.info{color:#bfdbfe;border-color:#1d4ed8}
+.note-box{
+  margin-top:12px;padding:12px;border-radius:14px;background:#0b1220;border:1px dashed var(--line2)
+}
+.dep-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.side-list{display:grid;gap:10px}
+.side-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.xp-bar{height:14px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid var(--line);margin-top:10px}
+.xp-bar>div{height:100%;background:linear-gradient(90deg,#f59e0b,#22c55e)}
+
+.map-wrap{padding:20px;overflow:hidden;position:relative}
+.map-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px}
+.strategy-map{
+  position:relative;min-height:640px;border-radius:18px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(56,189,248,.06), transparent 18%),
+    radial-gradient(circle at 80% 30%, rgba(34,197,94,.06), transparent 18%),
+    radial-gradient(circle at 50% 80%, rgba(167,139,250,.05), transparent 18%),
+    linear-gradient(180deg, rgba(11,18,32,.8), rgba(7,16,29,.95));
+  border:1px solid var(--line);
+  overflow:hidden;
+}
+.map-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.map-node{
+  position:absolute;width:260px;min-height:126px;padding:16px 16px 14px;border-radius:22px;
+  border:1px solid rgba(100,116,139,.38);
+  background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(10,17,29,.96));
+  box-shadow:0 18px 30px rgba(0,0,0,.26);
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.map-node:hover{
+  transform:scale(1.05) translateY(-4px);
+  box-shadow:0 28px 48px rgba(0,0,0,.4);
+  border-color:rgba(56,189,248,.6);
+}
+.map-node.active{border-color:rgba(34,197,94,.65)}
+.map-node.locked{opacity:.72}
+.map-node h4{font-size:18px;margin-bottom:6px}
+.map-node .node-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+.map-node .mini-progress{
+  margin-top:10px;height:10px;border-radius:999px;border:1px solid var(--line);overflow:hidden;background:#07101d
+}
+.map-node .mini-progress>div{
+  height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));width:0
+}
+.node-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;padding:5px 9px;border-radius:999px;background:#0b1220;border:1px solid var(--line2)
+}
+.strategy-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.chart-card,.timeline-card{padding:18px}
+.bar-chart{display:grid;gap:12px}
+.bar-row{display:grid;grid-template-columns:160px 1fr 54px;gap:12px;align-items:center}
+.bar-track{height:14px;border-radius:999px;overflow:hidden;border:1px solid var(--line);background:#09111d}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent2));width:0}
+.ring-wrap{display:flex;align-items:center;justify-content:center;min-height:260px}
+.ring{
+  width:220px;height:220px;border-radius:50%;
+  display:grid;place-items:center;
+  background:conic-gradient(var(--accent) 0deg, var(--accent2) 120deg, #172033 120deg 360deg);
+  position:relative;
+}
+.ring:before{
+  content:"";position:absolute;inset:20px;border-radius:50%;background:#09111d;border:1px solid var(--line)
+}
+.ring-center{position:relative;text-align:center;z-index:1}
+.ring-center .big{font-size:44px;font-weight:800}
+.timeline-list{display:grid;gap:10px}
+.timeline-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.timeline-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+
+table{width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700}
+.table-wrap{padding:16px;overflow:auto}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.modal{
+  position:fixed;inset:0;background:rgba(2,6,23,.78);
+  display:none;align-items:center;justify-content:center;padding:16px;z-index:20
+}
+.modal.show{display:flex}
+.modal-box{width:min(900px,100%);padding:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+.checkbox-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:180px;overflow:auto;padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.checkbox-item{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid transparent;border-radius:12px;background:#0d1627}
+.checkbox-item input{margin-top:2px}
+.empty{padding:18px;color:var(--muted)}
+.footer-note{color:var(--muted);font-size:12px;margin-top:10px}
+
+.buff-layout{display:grid;grid-template-columns:.92fr 1.08fr;gap:18px;margin-top:16px}
+.buff-side{display:grid;gap:16px}
+.buff-main{display:grid;gap:16px}
+.connector-grid,.basket-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.connector-box,.basket-box,.catalog-box{padding:18px}
+.catalog-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.catalog-toolbar .search{min-width:220px}
+.soft-card{padding:14px;border:1px solid var(--line);border-radius:16px;background:#0b1220}
+.split-label{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.skin-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line2);border-radius:999px;background:#101b2d;font-size:12px}
+.basket-list{display:grid;gap:10px;max-height:320px;overflow:auto}
+.basket-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.inline-input{width:92px}
+.market-table input,.market-table select{min-width:84px}
+.table-wrap.compact{padding:0;background:transparent;border:none;box-shadow:none}
+.section-title{font-size:18px;font-weight:800;margin-bottom:6px}
+.hint{font-size:12px;color:var(--muted);line-height:1.5}
+.toggle-cell{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.status-good{color:#86efac}
+.status-bad{color:#fca5a5}
+.status-neutral{color:#93c5fd}
+.repo-note{margin-top:12px;padding:12px 14px;border-radius:14px;background:#0b1220;border:1px dashed var(--line2)}
+
+
+
+.dashboard-grid.core{grid-template-columns:repeat(5,1fr)}
+.focus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px}
+.focus-card{padding:18px}
+.focus-list{display:grid;gap:10px;margin-top:12px}
+.focus-entry{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.focus-entry strong{display:block;margin-bottom:4px}
+.kpi-mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:18px}
+.geo-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin-top:18px}
+.geo-map-wrap,.market-table-card{padding:18px}
+.geo-map{position:relative;min-height:760px;border-radius:22px;border:1px solid var(--line);overflow:hidden;background:linear-gradient(180deg, rgba(3,10,20,.92), rgba(7,16,29,.98));}
+.geo-map svg{position:absolute;inset:0;width:100%;height:100%}
+.geo-node{position:absolute;transform:translate(-50%,-50%);min-width:180px;max-width:220px;padding:14px 14px 12px;border-radius:18px;border:1px solid rgba(100,116,139,.45);background:linear-gradient(180deg, rgba(15,23,42,.96), rgba(7,16,29,.96));box-shadow:0 16px 34px rgba(0,0,0,.34);transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;}
+.geo-node:hover{transform:translate(-50%,-50%) scale(1.05);box-shadow:0 28px 46px rgba(0,0,0,.46);border-color:rgba(56,189,248,.75)}
+.geo-node.main{border-color:rgba(34,197,94,.8)}
+.geo-node.selp{border-color:rgba(168,85,247,.78)}
+.geo-node .market-name{font-size:18px;font-weight:800;margin-bottom:6px}
+.geo-node .market-meta{font-size:12px;color:var(--muted);line-height:1.45}
+.geo-node .market-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.geo-node .market-chip{padding:7px 9px;border-radius:12px;background:#0b1220;border:1px solid var(--line);font-size:11px}
+.map-layer-toggle{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent2)}
+.market-table{width:100%;border-collapse:collapse}
+.market-table input{width:100%}
+.market-table td,.market-table th{padding:10px;border-bottom:1px solid var(--line)}
+.flow-list{display:grid;gap:10px;margin-top:16px;max-height:360px;overflow:auto;padding-right:4px}
+.flow-item{padding:12px;border:1px solid var(--line);border-radius:14px;background:#0b1220}
+.flow-item strong{display:block;margin-bottom:6px}
+.geo-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.map-caption{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}
+
+@media (max-width:1180px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .buff-layout{grid-template-columns:1fr}
+  .connector-grid,.basket-kpis{grid-template-columns:repeat(2,1fr)}
+  .grid-main,.hero-grid,.chart-grid{grid-template-columns:1fr}
+  .kpi-grid,.dashboard-grid,.skins-kpis{grid-template-columns:repeat(2,1fr)}
+  .mission-meta{grid-template-columns:repeat(2,1fr)}
+  .map-node{width:220px}
+  .dashboard-grid.core,.kpi-mini-grid,.focus-grid,.geo-grid,.geo-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:820px){
+  .stats,.kpi-grid,.dashboard-grid,.skins-kpis,.mission-meta,.form-grid,.checkbox-grid,.connector-grid,.basket-kpis{grid-template-columns:1fr}
+  .task{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:1fr}
+  .map-node{position:static;width:auto;margin:14px}
+  .strategy-map{min-height:auto;padding:12px}
+  .map-svg{display:none}
+  .dashboard-grid.core,.kpi-mini-grid,.focus-grid,.geo-grid,.geo-kpis{grid-template-columns:1fr}
+  .geo-map{min-height:980px}
+  .geo-node{min-width:150px;max-width:190px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <h1>Selp.Market — control panel v3</h1>
+        <div class="sub">
+          Рабочий кабинет под запуск маркетплейса: этапы, миссии, зависимости, блокеры, логи, таблица скинов и пространственная карта стратегии.
+          Всё хранится локально в браузере на этом устройстве.
+        </div>
+        <div class="stats">
+          <div class="card"><div class="label">Общий прогресс</div><div class="value" id="globalProgress">0%</div><div class="spark"><div id="globalSpark"></div></div></div>
+          <div class="card"><div class="label">Активный этап</div><div class="value sm" id="activeStageLabel">—</div><div class="sub" id="activeStageHint">—</div></div>
+          <div class="card"><div class="label">Уровень</div><div class="value" id="levelValue">1</div><div class="sub" id="levelSub">Системный XP</div></div>
+          <div class="card"><div class="label">XP</div><div class="value" id="xpValue">0</div><div class="sub" id="xpSub">До следующего уровня: 100 XP</div></div>
+          <div class="card"><div class="label">Блокеров</div><div class="value" id="blockersValue">0</div><div class="sub" id="deadlineSub">Просрочено: 0</div></div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="card">
+          <div class="label">Launch Gate</div>
+          <div class="value sm" id="launchGateLabel">—</div>
+          <div class="sub" id="launchGateText">—</div>
+        </div>
+        <div class="card">
+          <div class="label">Что сегодня важно</div>
+          <div class="side-list" id="todayFocus"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="strategy">Стратегия</button>
+    <button class="tab" data-tab="missions">Миссии</button>
+    <button class="tab" data-tab="skins">Скины</button>
+    <button class="tab" data-tab="logs">Логи</button>
+    <button class="tab" data-tab="guide">Как пользоваться</button>
+  </div>
+
+  <section id="dashboardTab">
+    <div class="dashboard-grid core">
+      <div class="card"><div class="label">Миссий завершено</div><div class="value" id="completedMissions">0</div></div>
+      <div class="card"><div class="label">Активных миссий</div><div class="value" id="activeMissionsValue">0</div></div>
+      <div class="card"><div class="label">Подзадач в блокере</div><div class="value" id="blockedTasksValue">0</div></div>
+      <div class="card"><div class="label">Launch readiness</div><div class="value" id="launchReadinessValue">0%</div></div>
+      <div class="card"><div class="label">Gate score</div><div class="value" id="gateScoreValue">0/100</div></div>
+    </div>
+
+    <div class="kpi-mini-grid">
+      <div class="card"><div class="label">Liquidity coverage</div><div class="value" id="liquidityCoverageValue">0%</div></div>
+      <div class="card"><div class="label">Active LP</div><div class="value" id="activeLpValue">0</div></div>
+      <div class="card"><div class="label">Active arbitrage</div><div class="value" id="activeArbValue">0</div></div>
+      <div class="card"><div class="label">Средний спред</div><div class="value" id="avgSpreadValue">0</div></div>
+      <div class="card"><div class="label">Зависших позиций</div><div class="value" id="stuckSkinsValue">0</div></div>
+    </div>
+
+    <div class="focus-grid">
+      <div class="chart-card focus-card">
+        <div class="label">Today</div>
+        <div class="focus-list" id="todayBoard"></div>
+      </div>
+      <div class="chart-card focus-card">
+        <div class="label">Next</div>
+        <div class="focus-list" id="nextBoard"></div>
+      </div>
+      <div class="chart-card focus-card">
+        <div class="label">Blocked</div>
+        <div class="focus-list" id="blockedBoard"></div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="label">Прогресс по этапам</div>
+        <div class="bar-chart" id="stageBars"></div>
+      </div>
+      <div class="chart-card">
+        <div class="label">Готовность запуска</div>
+        <div class="ring-wrap">
+          <div class="ring" id="launchRing">
+            <div class="ring-center">
+              <div class="big" id="launchRingValue">0%</div>
+              <div class="small">launch readiness</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="timeline-card">
+        <div class="label">Критические задачи и блокеры</div>
+        <div class="timeline-list" id="criticalList"></div>
+      </div>
+      <div class="timeline-card">
+        <div class="label">Последние изменения</div>
+        <div class="timeline-list" id="recentLogs"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="strategyTab" class="hidden">
+    <div class="map-wrap">
+      <div class="map-head">
+        <div>
+          <h2>Пространственная карта стратегии</h2>
+          <div class="sub">Сверху — маршрут запуска по этапам. Ниже — пространственная модель механики биржи: площадки, ликвидность, спреды, комиссии, арбитражные потоки и потери на маршрутах.</div>
+        </div>
+        <div class="strategy-legend">
+          <span class="node-tag">активный этап = зелёный контур</span>
+          <span class="node-tag">BUFF = главный внешний ориентир</span>
+          <span class="node-tag">рёбра показывают комиссии и потери</span>
+        </div>
+      </div>
+      <div class="strategy-map" id="strategyMap">
+        <svg class="map-svg" viewBox="0 0 1200 650" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="pathGradient" x1="0%" x2="100%">
+              <stop offset="0%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#22c55e" />
+            </linearGradient>
+            <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+              <path d="M0,0 L12,6 L0,12 z" fill="#38bdf8"></path>
+            </marker>
+          </defs>
+          <path d="M255 145 C 360 145, 400 145, 490 145" stroke="url(#pathGradient)" stroke-width="4" fill="none" marker-end="url(#arrow)" opacity=".75"></path>
+          <path d="M745 145 C 860 145, 910 145, 1000 145" stroke="url(#pathGradient)" stroke-width="4" fill="none" marker-end="url(#arrow)" opacity=".75"></path>
+          <path d="M1120 215 C 1120 305, 980 355, 870 390" stroke="url(#pathGradient)" stroke-width="4" fill="none" marker-end="url(#arrow)" opacity=".75"></path>
+          <path d="M620 455 C 520 455, 430 455, 350 455" stroke="url(#pathGradient)" stroke-width="4" fill="none" marker-end="url(#arrow)" opacity=".75"></path>
+          <path d="M120 390 C 120 305, 155 235, 210 190" stroke="url(#pathGradient)" stroke-width="3" fill="none" opacity=".2"></path>
+        </svg>
+        <div id="mapNodes"></div>
+      </div>
+
+      <div class="geo-grid">
+        <div class="geo-map-wrap card">
+          <div class="map-head" style="margin-bottom:16px">
+            <div>
+              <h3>Географическая карта механики рынка</h3>
+              <div class="sub">Логика движения цены: внешний рынок → арбитражники / LP → Selp.Market → покупатели. Фон — стилизованная карта Европы и Азии.</div>
+            </div>
+            <div class="map-layer-toggle">
+              <span class="node-tag"><span class="legend-dot"></span> market share</span>
+              <span class="node-tag">fee / spread / volatility</span>
+              <span class="node-tag">edge loss = суммарные потери маршрута</span>
+            </div>
+          </div>
+          <div class="geo-kpis">
+            <div class="card"><div class="label">Внешняя доля BUFF</div><div class="value sm" id="buffDominanceValue">0%</div></div>
+            <div class="card"><div class="label">Средняя комиссия узлов</div><div class="value sm" id="avgFeeValue">0%</div></div>
+            <div class="card"><div class="label">Суммарные route-loss</div><div class="value sm" id="routeLossValue">0%</div></div>
+          </div>
+          <div class="geo-map" id="geoMarketMap">
+            <svg viewBox="0 0 1400 860" preserveAspectRatio="none" id="geoSvgLayer">
+              <defs>
+                <linearGradient id="seaGrad" x1="0%" x2="100%"><stop offset="0%" stop-color="#07101d"/><stop offset="100%" stop-color="#0b1730"/></linearGradient>
+                <linearGradient id="landGrad" x1="0%" x2="100%"><stop offset="0%" stop-color="rgba(34,197,94,.13)"/><stop offset="100%" stop-color="rgba(56,189,248,.09)"/></linearGradient>
+                <linearGradient id="flowGrad" x1="0%" x2="100%"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+                <marker id="flowArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#38bdf8"></path></marker>
+              </defs>
+              <rect x="0" y="0" width="1400" height="860" fill="url(#seaGrad)"></rect>
+              <path d="M110 240 C 220 120, 430 80, 610 120 C 700 140, 770 170, 860 180 C 980 194, 1130 140, 1240 190 C 1290 214, 1330 258, 1296 312 C 1248 388, 1090 362, 1016 398 C 926 440, 884 546, 786 590 C 660 646, 536 590, 426 560 C 300 526, 150 532, 108 432 C 84 374, 60 296, 110 240 Z" fill="url(#landGrad)" stroke="rgba(148,163,184,.16)" stroke-width="2"></path>
+              <path d="M214 282 C 280 222, 378 194, 472 220 C 564 246, 592 316, 674 326 C 744 334, 816 300, 882 308 C 970 320, 1054 396, 1030 472 C 998 568, 846 560, 754 592 C 642 632, 566 702, 470 688 C 364 672, 314 564, 228 514 C 158 474, 114 406, 138 348 C 150 320, 178 308, 214 282 Z" fill="rgba(56,189,248,.05)" stroke="rgba(148,163,184,.08)" stroke-width="2"></path>
+              <g id="geoFlowLayer"></g>
+            </svg>
+            <div id="geoNodeLayer"></div>
+          </div>
+          <div class="map-caption">Редактируй комиссии, доли, ликвидность и потери в таблице справа — карта и рёбра пересчитываются автоматически. Это модуль для быстрого понимания, как рынок собирается вокруг Selp.Market.</div>
+        </div>
+
+        <div class="market-table-card card">
+          <h3>Участники и параметры рынка</h3>
+          <div class="sub" style="margin-top:8px">Здесь можно вписывать комиссии площадок, доли рынка, ликвидность и волатильность. Ниже — активные маршруты с потерями на каждом ребре.</div>
+          <div class="table-wrap" style="margin-top:16px;padding:0;border:none;background:transparent;box-shadow:none">
+            <table class="market-table">
+              <thead>
+                <tr><th>Участник</th><th>Fee %</th><th>Share %</th><th>Liquidity</th><th>Volatility</th></tr>
+              </thead>
+              <tbody id="marketTableBody"></tbody>
+            </table>
+          </div>
+          <div class="flow-list" id="flowList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="missionsTab" class="hidden">
+    <div class="toolbar">
+      <input id="searchInput" class="search" placeholder="Поиск по миссиям, этапам, задачам, заметкам">
+      <select id="stageFilter"></select>
+      <select id="statusFilter">
+        <option value="all">Все статусы</option>
+        <option value="Не начато">Не начато</option>
+        <option value="В работе">В работе</option>
+        <option value="Готово">Готово</option>
+        <option value="Блокер">Блокер</option>
+      </select>
+      <select id="priorityFilter">
+        <option value="all">Все приоритеты</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+      <button class="btn-primary" id="addMissionBtn">+ Добавить миссию</button>
+      <button id="exportBtn">Экспорт JSON</button>
+      <button id="importBtn">Импорт JSON</button>
+      <input type="file" id="importFile" accept=".json" class="hidden">
+      <button id="resetBtn" class="btn-danger">Сбросить всё</button>
+    </div>
+
+    <div class="grid-main">
+      <div class="missions" id="missionsList"></div>
+      <aside class="sidebar">
+        <div class="card">
+          <h3>Твой прогресс</h3>
+          <div class="sub">Каждая закрытая подзадача дает XP. Закрытая миссия дает бонус. Этапы подсказывают, когда реально можно переходить к следующему блоку.</div>
+          <div style="margin-top:10px"><span class="pill ok" id="levelBadge">Уровень 1</span></div>
+          <div class="xp-bar"><div id="xpBar" style="width:0%"></div></div>
+          <div class="footer-note" id="xpNote">До следующего уровня: 100 XP</div>
+        </div>
+
+        <div class="card">
+          <h3>Ежедневный контроль</h3>
+          <div class="sub">
+            1. Проверить остатки ликвидных предметов.<br>
+            2. Проверить зависшие позиции.<br>
+            3. Проверить активные LP / market makers.<br>
+            4. Проверить, готов ли арбитражный поток.<br>
+            5. Решить, можно ли масштабировать трафик.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Этапы запуска</h3>
+          <div class="side-list" id="stageSidebar"></div>
+        </div>
+
+        <div class="card">
+          <h3>Статусы</h3>
+          <div class="sub">
+            <span class="pill">Не начато</span>
+            <span class="pill warn">В работе</span>
+            <span class="pill ok">Готово</span>
+            <span class="pill danger">Блокер</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  
+  <section id="skinsTab" class="hidden">
+    <div class="toolbar">
+      <button class="btn-primary" id="addSkinBtn">+ Добавить позицию</button>
+      <button class="btn-blue" id="syncBuffBtn">Sync BUFF API</button>
+      <button id="importBuffJsonBtn">Импорт BUFF JSON</button>
+      <input type="file" id="buffJsonFile" accept=".json" class="hidden">
+      <button id="exportCsvBtn">Экспорт позиций CSV</button>
+      <button id="exportBasketBtn">Экспорт корзины CSV</button>
+      <button id="importCsvBtn">Импорт CSV</button>
+      <input type="file" id="csvFile" accept=".csv" class="hidden">
+    </div>
+
+    <div class="skins-kpis">
+      <div class="card"><div class="label">Позиции</div><div class="value" id="skinCount">0</div></div>
+      <div class="card"><div class="label">Средний спред</div><div class="value" id="skinAvgSpread">0</div></div>
+      <div class="card"><div class="label">Потенц. прибыль</div><div class="value" id="skinPotentialProfit">0</div></div>
+      <div class="card"><div class="label">В корзине</div><div class="value" id="basketItemsCount">0</div></div>
+      <div class="card"><div class="label">Закупка корзины</div><div class="value" id="basketBuyTotal">0</div></div>
+      <div class="card"><div class="label">Потенц. sell корзины</div><div class="value" id="basketSellTotal">0</div></div>
+    </div>
+
+    <div class="buff-layout">
+      <div class="buff-side">
+        <div class="card connector-box">
+          <div class="section-title">BUFF connector</div>
+          <div class="hint">Для GitHub Pages лучше подключать не прямой BUFF URL, а свой proxy endpoint. В браузере прямые запросы могут не пройти из-за CORS / авторизации.</div>
+          <div class="connector-grid" style="margin-top:14px">
+            <input id="buffEndpoint" placeholder="https://your-proxy.example.com/buff/catalog">
+            <input id="buffApiKey" placeholder="API key / token">
+            <select id="buffImportMode">
+              <option value="proxy">Proxy API</option>
+              <option value="mock">Mock / demo</option>
+              <option value="manual_json">Manual JSON</option>
+            </select>
+          </div>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn-blue" id="saveBuffSettingsBtn">Сохранить настройки</button>
+            <button id="loadBuffMockBtn">Загрузить demo data</button>
+          </div>
+          <div class="repo-note">
+            <div class="small">Последняя синхронизация: <span id="buffLastSync">—</span></div>
+            <div class="small">Режим: <span id="buffModeView">proxy</span></div>
+          </div>
+        </div>
+
+        <div class="card basket-box">
+          <div class="split-label">
+            <div>
+              <div class="section-title">Корзина ликвидности</div>
+              <div class="hint">Собирай пул скинов под старт ликвидности. Каждый элемент можно держать только в корзине или сразу переносить в управляемые позиции.</div>
+            </div>
+            <div class="actions">
+              <button id="clearBasketBtn" class="btn-danger">Очистить корзину</button>
+            </div>
+          </div>
+          <div class="basket-kpis" style="margin-top:14px">
+            <div class="soft-card"><div class="label">SKU</div><div class="value sm" id="basketSkuValue">0</div></div>
+            <div class="soft-card"><div class="label">Qty</div><div class="value sm" id="basketQtyValue">0</div></div>
+            <div class="soft-card"><div class="label">Expected PnL</div><div class="value sm" id="basketPnlValue">0</div></div>
+          </div>
+          <div class="basket-list" id="basketList" style="margin-top:14px"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">GitHub repo notes</div>
+          <div class="hint">Этот файл можно сразу положить в репозиторий как <span class="mono">index.html</span> и открыть через GitHub Pages. Для BUFF API статический HTML должен ходить в твой proxy endpoint или принимать JSON вручную.</div>
+        </div>
+      </div>
+
+      <div class="buff-main">
+        <div class="card catalog-box">
+          <div class="split-label">
+            <div>
+              <div class="section-title">BUFF catalog / source pool</div>
+              <div class="hint">Это входной поток из BUFF. Отсюда ты отбираешь ликвидные позиции и добавляешь их в корзину ликвидности.</div>
+            </div>
+            <span class="skin-chip">source: BUFF</span>
+          </div>
+          <div class="catalog-toolbar">
+            <input id="buffSearchInput" class="search" placeholder="Поиск по item / game / source id">
+            <select id="buffGameFilter">
+              <option value="all">Все игры</option>
+              <option value="CS2">CS2</option>
+              <option value="Rust">Rust</option>
+              <option value="Dota 2">Dota 2</option>
+            </select>
+            <select id="buffLiquidityFilter">
+              <option value="all">Любая ликвидность</option>
+              <option value="80">80+</option>
+              <option value="60">60+</option>
+              <option value="40">40+</option>
+            </select>
+          </div>
+          <div class="table-wrap compact">
+            <table>
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Item</th>
+                  <th>BUFF price</th>
+                  <th>Target sell</th>
+                  <th>Spread</th>
+                  <th>Liquidity</th>
+                  <th>24h vol</th>
+                  <th>Source</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="buffCatalogBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="split-label">
+            <div>
+              <div class="section-title">Управляемые позиции</div>
+              <div class="hint">Это уже твой внутренний список позиций для учета спреда, маржи, статуса и комментариев.</div>
+            </div>
+          </div>
+          <div class="table-wrap compact" style="margin-top:14px">
+            <table>
+              <thead>
+                <tr>
+                  <th>Игра</th>
+                  <th>Предмет</th>
+                  <th>Платформа покупки</th>
+                  <th>Цена закупки</th>
+                  <th>Цена продажи</th>
+                  <th>Спред</th>
+                  <th>Маржа %</th>
+                  <th>Qty</th>
+                  <th>Basket</th>
+                  <th>Статус</th>
+                  <th>Комментарий</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="skinsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-note">CSV формат позиций: game,item,buyPlatform,buyPrice,sellPrice,status,comment,quantity,inBasket</div>
+  </section>
+
+  <section id="logsTab" class="hidden"> class="hidden">
+    <div class="card">
+      <h2>История изменений</h2>
+      <div class="sub" style="margin-bottom:14px">Фиксируются изменения миссий, подзадач, скинов и импорт/экспорт.</div>
+      <div class="timeline-list" id="logsList"></div>
+    </div>
+  </section>
+
+  <section id="guideTab" class="hidden">
+    <div class="card" style="padding:20px">
+      <h2>Как пользоваться</h2>
+      <div class="sub" style="margin-top:14px">
+        1. Во вкладке <b>Миссии</b> создай миссию и привяжи её к этапу запуска.<br><br>
+        2. Укажи приоритет, дедлайн и зависимости — это покажет, что реально блокирует следующий шаг.<br><br>
+        3. Внутри миссии добавляй подзадачи. Для каждой подзадачи можно менять статус: не начато / в работе / блокер / готово.<br><br>
+        4. Во вкладке <b>Стратегия</b> виден пространственный маршрут запуска проекта. Узлы слегка увеличиваются при наведении.<br><br>
+        5. Во вкладке <b>Dashboard</b> смотри прогресс по этапам, critical задачи, launch readiness и последние изменения.<br><br>
+        6. Во вкладке <b>Скины</b> теперь есть BUFF connector, source-pool, корзина ликвидности и управляемые позиции. Можно синхронизировать каталог через proxy API или импортировать JSON вручную.<br><br>
+        7. Экспорт JSON сохраняет весь кабинет целиком. Всё работает без сервера и сохраняется локально.
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="missionModal" class="modal">
+  <div class="modal-box">
+    <h3 id="missionModalTitle">Новая миссия</h3>
+    <div class="form-grid" style="margin-top:14px">
+      <select id="missionStage"></select>
+      <input id="missionPhase" placeholder="Глава / фаза, например: Глава 3">
+      <input id="missionTitle" placeholder="Название миссии">
+      <select id="missionStatus">
+        <option>Не начато</option>
+        <option>В работе</option>
+        <option>Готово</option>
+        <option>Блокер</option>
+      </select>
+      <select id="missionPriority">
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+      <input id="missionDate" type="date">
+      <div class="full">
+        <div class="small" style="margin-bottom:8px">Зависит от миссий</div>
+        <div id="missionDependencies" class="checkbox-grid"></div>
+      </div>
+      <textarea id="missionNotes" class="full" placeholder="Комментарий по миссии"></textarea>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn-primary" id="saveMissionBtn">Сохранить</button>
+      <button id="closeMissionModal">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<div id="taskModal" class="modal">
+  <div class="modal-box">
+    <h3 id="taskModalTitle">Новая подзадача</h3>
+    <div class="form-grid" style="margin-top:14px">
+      <input id="taskText" class="full" placeholder="Текст подзадачи">
+      <select id="taskStatus">
+        <option value="not_started">Не начато</option>
+        <option value="in_progress">В работе</option>
+        <option value="blocked">Блокер</option>
+        <option value="done">Готово</option>
+      </select>
+      <input id="taskDeadline" type="date">
+      <textarea id="taskComment" class="full" placeholder="Комментарий / уточнение"></textarea>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn-primary" id="saveTaskBtn">Сохранить</button>
+      <button id="closeTaskModal">Отмена</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="skinModal" class="modal">
+  <div class="modal-box">
+    <h3 id="skinModalTitle">Новая позиция</h3>
+    <div class="form-grid" style="margin-top:14px">
+      <input id="skinGame" placeholder="Игра: CS2 / Rust / Dota 2">
+      <input id="skinItem" placeholder="Название предмета">
+      <input id="skinPlatform" placeholder="Платформа покупки">
+      <input id="skinBuyPrice" type="number" step="0.01" placeholder="Цена закупки">
+      <input id="skinSellPrice" type="number" step="0.01" placeholder="Цена продажи">
+      <input id="skinQuantity" type="number" step="1" min="1" placeholder="Количество">
+      <select id="skinStatus">
+        <option>Новая позиция</option>
+        <option>Куплено</option>
+        <option>Выставлено</option>
+        <option>Продано</option>
+        <option>Зависло</option>
+      </select>
+      <select id="skinInBasket">
+        <option value="true">В корзине ликвидности</option>
+        <option value="false">Не в корзине</option>
+      </select>
+      <input id="skinSourceId" placeholder="BUFF source id / external id">
+      <textarea id="skinComment" class="full" placeholder="Комментарий"></textarea>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button class="btn-primary" id="saveSkinBtn">Сохранить</button>
+      <button id="closeSkinModal">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY='selp_market_tracker_v5';
+const LEGACY_KEYS=['selp_market_tracker_v5','selp_market_tracker_v4','selp_market_tracker_v3','selp_market_tracker_v2','selp_market_tracker_v1'];
+
+const STAGES=[
+  {id:'liquidity', title:'1. Liquidity', short:'Liquidity', description:'Создание базовой ликвидности и ассортимента.'},
+  {id:'stabilization', title:'2. Price Stabilization', short:'Stabilization', description:'Выравнивание цен и предсказуемость рынка.'},
+  {id:'arbitrage', title:'3. Arbitrage', short:'Arbitrage', description:'Подключение арбитражников и market makers.'},
+  {id:'traffic', title:'4. Traffic', short:'Traffic', description:'Подключение рекламных каналов после стабильности.'},
+  {id:'tournaments', title:'5. Tournaments', short:'Tournaments', description:'Турниры как усилитель, а не старт.'},
+  {id:'scale', title:'6. Scale', short:'Scale', description:'Масштабирование работающей модели.'}
+];
+
+function cryptoRandom(){return 'id-'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4)}
+function nowIso(){return new Date().toISOString()}
+function escapeHtml(str=''){return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;")}
+function formatDate(date){if(!date)return '—'; const d=new Date(date); if(isNaN(d)) return date; return d.toLocaleDateString('ru-RU')}
+function priorityLabel(v){return ({low:'Low',medium:'Medium',high:'High',critical:'Critical'})[v]||'Medium'}
+function taskStatusLabel(v){return ({not_started:'Не начато',in_progress:'В работе',blocked:'Блокер',done:'Готово'})[v]||'Не начато'}
+function taskStatusColor(v){return v==='done'?'done':v==='blocked'?'block':v==='in_progress'?'work':''}
+function stageById(id){return STAGES.find(s=>s.id===id)||STAGES[0]}
+function spreadValue(s){return Number((Number(s.sellPrice||0)-Number(s.buyPrice||0)).toFixed(2))}
+function marginValue(s){const buy=Number(s.buyPrice||0), sell=Number(s.sellPrice||0); if(!buy) return 0; return Number((((sell-buy)/buy)*100).toFixed(1))}
+function missionStatusClass(status){if(status==='Готово')return 'done'; if(status==='В работе')return 'work'; if(status==='Блокер')return 'block'; return ''}
+function stringifyValue(v){ if(v===undefined||v===null||v==='') return '—'; if(typeof v==='object') return JSON.stringify(v); return String(v); }
+function logAction(text,type='system',meta={}){state.logs.unshift({id:cryptoRandom(),text,type,createdAt:nowIso(),...meta}); state.logs=state.logs.slice(0,400); saveState()}
+function logChange(entityType,entityName,field,oldValue,newValue){ if(stringifyValue(oldValue)===stringifyValue(newValue)) return; logAction(`Изменено ${entityType} «${entityName}»: ${field} — ${stringifyValue(oldValue)} → ${stringifyValue(newValue)}`,'change',{entityType,entityName,field,oldValue:stringifyValue(oldValue),newValue:stringifyValue(newValue)}); }
+
+const defaultData={
+  missions:[
+    {id:cryptoRandom(),stageId:'liquidity',phase:'Глава 1',title:'Собрать стартовую ликвидность',status:'В работе',priority:'critical',due:'',notes:'Ключевой этап. Пока он не закрыт — трафик нельзя масштабировать.',dependsOn:[],createdAt:nowIso(),updatedAt:nowIso(),tasks:[{id:cryptoRandom(),text:'1.1 Подтвердить пул LP на 2 000 000 ₽',status:'in_progress',deadline:'',comment:''},{id:cryptoRandom(),text:'1.2 Подтвердить инвентарь владельца на ~3 000 000 ₽',status:'not_started',deadline:'',comment:''},{id:cryptoRandom(),text:'1.3 Разбить пул по CS2 / Rust / Dota 2',status:'not_started',deadline:'',comment:''},{id:cryptoRandom(),text:'1.4 Составить список якорных ликвидных предметов',status:'blocked',deadline:'',comment:'Нужно подтвердить ассортимент'}]},
+    {id:cryptoRandom(),stageId:'stabilization',phase:'Глава 1.5',title:'Стабилизировать цены и оборот',status:'Не начато',priority:'high',due:'',notes:'Нужно понять, что рынок держит спреды и нет критичного количества зависших предметов.',dependsOn:[],createdAt:nowIso(),updatedAt:nowIso(),tasks:[{id:cryptoRandom(),text:'1.5.1 Проверить spread-коридоры по топовым позициям',status:'not_started',deadline:'',comment:''},{id:cryptoRandom(),text:'1.5.2 Зафиксировать долю зависших предметов',status:'not_started',deadline:'',comment:''}]},
+    {id:cryptoRandom(),stageId:'arbitrage',phase:'Глава 2',title:'Подготовить арбитражную механику',status:'Не начато',priority:'high',due:'',notes:'Арбитражный поток подключается после того, как база ликвидности уже собрана.',dependsOn:[],createdAt:nowIso(),updatedAt:nowIso(),tasks:[{id:cryptoRandom(),text:'2.1 Собрать 10 примеров BUFF → Selp.Market',status:'not_started',deadline:'',comment:''},{id:cryptoRandom(),text:'2.2 Описать модель дохода LP на конкретных цифрах',status:'not_started',deadline:'',comment:''},{id:cryptoRandom(),text:'2.3 Подготовить оффер для арбитражников',status:'not_started',deadline:'',comment:''}]},
+    {id:cryptoRandom(),stageId:'traffic',phase:'Глава 3',title:'Подготовить рекламный блок',status:'Не начато',priority:'medium',due:'',notes:'Не активировать массово, пока цены и оборот не стабилизированы.',dependsOn:[],createdAt:nowIso(),updatedAt:nowIso(),tasks:[{id:cryptoRandom(),text:'3.1 Собрать первые 30 релевантных инфлюенсеров',status:'not_started',deadline:'',comment:''},{id:cryptoRandom(),text:'3.2 Разбить блогеров по платформам и аудитории',status:'not_started',deadline:'',comment:''}]}
+  ],
+  skins:[
+    {id:cryptoRandom(),game:'CS2',item:'Revolution Case',buyPlatform:'BUFF',buyPrice:'70',sellPrice:'79',status:'Выставлено',comment:'Тестовая позиция',quantity:12,inBasket:true,sourceId:'buff-001'},
+    {id:cryptoRandom(),game:'Rust',item:'Tempered AK47',buyPlatform:'BUFF',buyPrice:'45',sellPrice:'49.9',status:'Куплено',comment:'',quantity:4,inBasket:true,sourceId:'buff-002'},
+    {id:cryptoRandom(),game:'Dota 2',item:'Immortal Head',buyPlatform:'Steam',buyPrice:'18.2',sellPrice:'21.4',status:'Зависло',comment:'Проверить оборот',quantity:2,inBasket:false,sourceId:'steam-003'}
+  ],
+  buffConnector:{
+    endpoint:'',
+    apiKey:'',
+    mode:'mock',
+    lastSyncAt:''
+  },
+  buffCatalog:[
+    {id:'buff-cat-1',game:'CS2',item:'AK-47 | Redline (FT)',buffPrice:122.5,targetSellPrice:133.8,liquidityScore:92,volume24h:148,sourceId:'buff-ak-redline-ft',wear:'FT',notes:'Якорная ликвидность'},
+    {id:'buff-cat-2',game:'CS2',item:'AWP | Asiimov (BS)',buffPrice:315,targetSellPrice:339,liquidityScore:78,volume24h:46,sourceId:'buff-awp-asiimov-bs',wear:'BS',notes:'Нормальный спред'},
+    {id:'buff-cat-3',game:'Rust',item:'Tempered AK47',buffPrice:44.6,targetSellPrice:49.9,liquidityScore:73,volume24h:31,sourceId:'buff-rust-ak-temp',wear:'',notes:'Проверить скорость оборота'},
+    {id:'buff-cat-4',game:'Dota 2',item:'Inscribed Demon Eater',buffPrice:88.2,targetSellPrice:95.4,liquidityScore:61,volume24h:17,sourceId:'buff-dota-demon',wear:'',notes:'Средняя ликвидность'}
+  ],
+  liquidityBasket:[],
+  strategy:{
+    markets:[
+      {id:'buff',name:'BUFF',region:'China / APAC',type:'external',x:76,y:24,fee:2.5,share:42,liquidity:96,volatility:44,role:'Главный внешний price-anchor'},
+      {id:'selp',name:'Selp.Market',region:'Core',type:'selp',x:52,y:52,fee:2.0,share:12,liquidity:58,volatility:52,role:'Точка сборки ликвидности'},
+      {id:'csmoney',name:'CS.MONEY',region:'EU',type:'external',x:33,y:35,fee:7.0,share:18,liquidity:78,volatility:46,role:'Широкая retail-аудитория'},
+      {id:'steam',name:'Steam Market',region:'Global',type:'external',x:48,y:23,fee:15.0,share:20,liquidity:88,volatility:36,role:'Базовый reference market'},
+      {id:'lp',name:'LP / Market Makers',region:'Internal',type:'internal',x:24,y:58,fee:1.0,share:5,liquidity:72,volatility:34,role:'Поддержка стакана и глубины'},
+      {id:'arbers',name:'Arbitrage Traders',region:'Cross-market',type:'internal',x:67,y:64,fee:0.8,share:3,liquidity:60,volatility:68,role:'Сшивают внешние цены'},
+      {id:'buyers',name:'Retail Buyers',region:'CIS / EU',type:'demand',x:49,y:78,fee:0.0,share:0,liquidity:64,volatility:58,role:'Конечный спрос'}
+    ],
+    flows:[
+      {id:'f1',from:'buff',to:'selp',label:'price discovery',loss:3.2,spread:4.6,volume:34,note:'Комиссия + разница закупки/продажи'},
+      {id:'f2',from:'csmoney',to:'selp',label:'retail overflow',loss:8.4,spread:10.8,volume:14,note:'Высокая fee, но полезный reference'},
+      {id:'f3',from:'steam',to:'selp',label:'reference anchor',loss:15.0,spread:17.5,volume:10,note:'Комиссии Steam сильно давят на net'},
+      {id:'f4',from:'lp',to:'selp',label:'depth support',loss:1.4,spread:2.1,volume:20,note:'Поддержка плотности стакана'},
+      {id:'f5',from:'arbers',to:'selp',label:'arbitrage sync',loss:2.2,spread:3.3,volume:18,note:'Арбитраж выравнивает рынок'},
+      {id:'f6',from:'selp',to:'buyers',label:'sell to demand',loss:2.0,spread:5.8,volume:36,note:'Итоговый монетизируемый маршрут'}
+    ]
+  },
+  logs:[]
+};
+
+function normalizeStrategy(data={}){
+  const defaults = JSON.parse(JSON.stringify(defaultData.strategy));
+  return {
+    markets:Array.isArray(data.markets)&&data.markets.length ? data.markets.map((m,i)=>({id:m.id||cryptoRandom(),name:m.name||`Market ${i+1}`,region:m.region||'',type:m.type||'external',x:Number(m.x??50),y:Number(m.y??50),fee:Number(m.fee??0),share:Number(m.share??0),liquidity:Number(m.liquidity??0),volatility:Number(m.volatility??0),role:m.role||''})) : defaults.markets,
+    flows:Array.isArray(data.flows)&&data.flows.length ? data.flows.map((f,i)=>({id:f.id||cryptoRandom(),from:f.from||'',to:f.to||'',label:f.label||`Flow ${i+1}`,loss:Number(f.loss??0),spread:Number(f.spread??0),volume:Number(f.volume??0),note:f.note||''})) : defaults.flows
+  };
+}
+
+let state=loadState();
+let editingMissionId=null;
+let editingSkinId=null;
+let editingTaskMissionId=null;
+let editingTaskId=null;
+let currentTab='dashboard';
+
+function normalizeTask(t){
+  const doneLegacy = typeof t.done==='boolean' ? t.done : null;
+  const status = t.status || (doneLegacy===true?'done':'not_started');
+  return {
+    id:t.id||cryptoRandom(),
+    text:t.text||'',
+    status,
+    deadline:t.deadline||'',
+    comment:t.comment||''
+  };
+}
+
+function normalizeMission(m){
+  return {
+    id:m.id||cryptoRandom(),
+    stageId:m.stageId||guessStageFromTitle(m.title||m.phase||''),
+    phase:m.phase||'Без фазы',
+    title:m.title||'Без названия',
+    status:m.status||'Не начато',
+    priority:m.priority||'medium',
+    due:m.due||'',
+    notes:m.notes||'',
+    dependsOn:Array.isArray(m.dependsOn)?m.dependsOn:[],
+    createdAt:m.createdAt||nowIso(),
+    updatedAt:m.updatedAt||nowIso(),
+    tasks:Array.isArray(m.tasks)?m.tasks.map(normalizeTask):[]
+  };
+}
+
+function normalizeSkin(s){
+  return {
+    id:s.id||cryptoRandom(),
+    game:s.game||'',
+    item:s.item||'',
+    buyPlatform:s.buyPlatform||'',
+    buyPrice:s.buyPrice||'',
+    sellPrice:s.sellPrice||'',
+    status:s.status||'Новая позиция',
+    comment:s.comment||'',
+    quantity:Number(s.quantity??1) || 1,
+    inBasket:Boolean(s.inBasket),
+    sourceId:s.sourceId||''
+  };
+}
+
+function normalizeBuffConnector(data={}){
+  return {
+    endpoint:data.endpoint||'',
+    apiKey:data.apiKey||'',
+    mode:data.mode||'mock',
+    lastSyncAt:data.lastSyncAt||''
+  };
+}
+
+function normalizeBuffCatalog(items=[]){
+  return Array.isArray(items) ? items.map((item, index)=>({
+    id:item.id||cryptoRandom(),
+    game:item.game||'CS2',
+    item:item.item||`BUFF item ${index+1}`,
+    buffPrice:Number(item.buffPrice??item.buyPrice??0),
+    targetSellPrice:Number(item.targetSellPrice??item.sellPrice??0),
+    liquidityScore:Number(item.liquidityScore??item.liquidity??0),
+    volume24h:Number(item.volume24h??item.volume??0),
+    sourceId:item.sourceId||item.market_hash_name||item.goodsId||'',
+    wear:item.wear||'',
+    notes:item.notes||''
+  })) : [];
+}
+
+function normalizeBasket(items=[]){
+  return Array.isArray(items) ? items.map(item=>({
+    id:item.id||cryptoRandom(),
+    catalogId:item.catalogId||'',
+    game:item.game||'CS2',
+    item:item.item||'',
+    buyPrice:Number(item.buyPrice??0),
+    targetSellPrice:Number(item.targetSellPrice??0),
+    quantity:Number(item.quantity??1) || 1,
+    liquidityScore:Number(item.liquidityScore??0),
+    sourceId:item.sourceId||''
+  })) : [];
+}
+
+function guessStageFromTitle(txt){
+  const v=String(txt||'').toLowerCase();
+  if(v.includes('ликвид')) return 'liquidity';
+  if(v.includes('стаб')) return 'stabilization';
+  if(v.includes('арбит')) return 'arbitrage';
+  if(v.includes('реклам')||v.includes('траф')||v.includes('блогер')) return 'traffic';
+  if(v.includes('турнир')) return 'tournaments';
+  if(v.includes('масш')) return 'scale';
+  return 'liquidity';
+}
+
+function loadState(){
+  for(const key of LEGACY_KEYS){
+    try{
+      const raw=localStorage.getItem(key);
+      if(raw){
+        const parsed=JSON.parse(raw);
+        const normalized={
+          missions:Array.isArray(parsed.missions)?parsed.missions.map(normalizeMission):[],
+          skins:Array.isArray(parsed.skins)?parsed.skins.map(normalizeSkin):[],
+          buffConnector:normalizeBuffConnector(parsed.buffConnector||{}),
+          buffCatalog:normalizeBuffCatalog(parsed.buffCatalog||[]),
+          liquidityBasket:normalizeBasket(parsed.liquidityBasket||[]),
+          strategy:normalizeStrategy(parsed.strategy||{}),
+          logs:Array.isArray(parsed.logs)?parsed.logs:[]
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+        return normalized;
+      }
+    }catch(e){}
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+  return JSON.parse(JSON.stringify(defaultData));
+}
+
+function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state))}
+
+function calculateMissionProgress(m){
+  const total=m.tasks.length||1;
+  const done=m.tasks.filter(t=>t.status==='done').length;
+  return Math.round(done/total*100);
+}
+
+function missionDependenciesResolved(mission){
+  if(!mission.dependsOn.length) return true;
+  return mission.dependsOn.every(id=>{
+    const ref=state.missions.find(m=>m.id===id);
+    return ref && calculateMissionProgress(ref)===100;
+  });
+}
+
+function computeStageStats(){
+  return STAGES.map((stage, index)=>{
+    const missions=state.missions.filter(m=>m.stageId===stage.id);
+    const progress = missions.length ? Math.round(missions.reduce((sum,m)=>sum+calculateMissionProgress(m),0)/missions.length) : 0;
+    const ready = missions.length ? missions.every(m=>calculateMissionProgress(m)===100 && missionDependenciesResolved(m)) : false;
+    const blockerCount = missions.filter(m=>m.status==='Блокер' || !missionDependenciesResolved(m)).length;
+    const prevReady = index===0 ? true : STAGES.slice(0,index).every(prev=>{
+      const prevStats = state.missions.filter(m=>m.stageId===prev.id);
+      return prevStats.length ? prevStats.every(x=>calculateMissionProgress(x)===100 && missionDependenciesResolved(x)) : false;
+    });
+    let stateLabel='locked';
+    if(prevReady && !ready) stateLabel='active';
+    if(ready) stateLabel='done';
+    return {stage, missions, progress, ready, blockerCount, stateLabel};
+  });
+}
+
+function computeStats(){
+  const allTasks=state.missions.flatMap(m=>m.tasks);
+  const doneTasks=allTasks.filter(t=>t.status==='done').length;
+  const blockedTasks=allTasks.filter(t=>t.status==='blocked').length;
+  const totalTasks=allTasks.length||1;
+  let xp=doneTasks*10;
+  let completedMissions=0;
+  state.missions.forEach(m=>{ if(calculateMissionProgress(m)===100){ completedMissions+=1; xp+=50; } });
+  const level=Math.floor(xp/100)+1;
+  const currentLevelXp=xp%100;
+  const globalProgress=Math.round(doneTasks/totalTasks*100);
+  const overdueMissions=state.missions.filter(m=>m.due && new Date(m.due)<new Date() && calculateMissionProgress(m)<100).length;
+  const blockers=state.missions.filter(m=>m.status==='Блокер' || !missionDependenciesResolved(m)).length + blockedTasks;
+  const activeMissions=state.missions.filter(m=>m.status==='В работе').length;
+  const stageStats=computeStageStats();
+  const activeStage=stageStats.find(s=>s.stateLabel==='active') || stageStats.find(s=>s.stateLabel!=='done') || stageStats[stageStats.length-1];
+  const spreads=state.skins.map(spreadValue);
+  const avgSpread=spreads.length ? Number((spreads.reduce((a,b)=>a+b,0)/spreads.length).toFixed(2)) : 0;
+  const potentialMargin=Number(state.skins.reduce((sum,s)=>sum+spreadValue(s),0).toFixed(2));
+  const stuckSkins=state.skins.filter(s=>s.status==='Зависло').length;
+  const strategyMarkets=state.strategy?.markets||[];
+  const strategyFlows=state.strategy?.flows||[];
+  const liquidityNode=strategyMarkets.find(m=>m.id==='selp');
+  const liquidityCoverage=Math.max(0,Math.min(100, Math.round(((liquidityNode?.liquidity||0)*0.6) + ((100-stuckSkins*10)*0.2) + (Math.min(100,avgSpread*8)*0.2))));
+  const activeLp=Math.max(0,Math.round((strategyMarkets.find(m=>m.id==='lp')?.share||0)/2));
+  const activeArb=Math.max(0,Math.round((strategyMarkets.find(m=>m.id==='arbers')?.share||0)));
+  const avgFee = strategyMarkets.length ? Number((strategyMarkets.reduce((sum,m)=>sum+Number(m.fee||0),0)/strategyMarkets.length).toFixed(2)) : 0;
+  const routeLoss = strategyFlows.length ? Number((strategyFlows.reduce((sum,f)=>sum+Number(f.loss||0),0)/strategyFlows.length).toFixed(2)) : 0;
+  const gateScore = Math.max(0,Math.min(100, Math.round(liquidityCoverage*0.35 + (100-routeLoss*4)*0.2 + (100-Math.min(90, stuckSkins*12))*0.15 + activeStage.progress*0.3 )));
+  const readiness = Math.max(0,Math.min(100, Math.round(stageStats.reduce((sum,s,idx)=>sum + s.progress*(idx===0?1.4:1),0) / (stageStats.length+0.4) * 0.65 + gateScore*0.35 )));
+  const gateRules = {liquidityReady: liquidityCoverage >= 65,stabilizationReady: stuckSkins <= 2 && avgSpread >= 3,arbitrageReady: activeArb >= 2,trafficReady: liquidityCoverage >= 70 && stuckSkins <= 2 && avgSpread >= 3,tournamentsReady: readiness >= 68 && activeStage.stage.id !== 'liquidity',scaleReady: readiness >= 82 && blockers===0};
+  const allMissionCards = state.missions.map(m=>({...m,progress:calculateMissionProgress(m),depsReady:missionDependenciesResolved(m),urgencyScore:(m.priority==='critical'?40:m.priority==='high'?28:m.priority==='medium'?18:8) + (m.status==='Блокер'?35:0) + (!missionDependenciesResolved(m)?20:0) + (m.due?10:0)}));
+  const todayList = allMissionCards.filter(m=>m.progress<100).sort((a,b)=>b.urgencyScore-a.urgencyScore).slice(0,5);
+  const nextList = allMissionCards.filter(m=>m.progress<100 && m.depsReady && m.status!=='Блокер').sort((a,b)=>b.progress-a.progress).slice(0,5);
+  const blockedList = allMissionCards.filter(m=>m.status==='Блокер' || !m.depsReady || m.tasks.some(t=>t.status==='blocked')).sort((a,b)=>b.urgencyScore-a.urgencyScore).slice(0,5);
+  return {xp,level,currentLevelXp,completedMissions,globalProgress,blockedTasks,overdueMissions,blockers,activeMissions,activeStage,stageStats,readiness,avgSpread,potentialMargin,stuckSkins,liquidityCoverage,activeLp,activeArb,avgFee,routeLoss,gateScore,gateRules,todayList,nextList,blockedList};
+}
+
+function populateStaticSelectors(){
+  const stageSelect=document.getElementById('missionStage');
+  const stageFilter=document.getElementById('stageFilter');
+  stageSelect.innerHTML=STAGES.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
+  stageFilter.innerHTML='<option value="all">Все этапы</option>' + STAGES.map(s=>`<option value="${s.id}">${s.title}</option>`).join('');
+}
+
+function renderHeader(){
+  const s=computeStats();
+  document.getElementById('globalProgress').textContent=s.globalProgress+'%';
+  document.getElementById('globalSpark').style.width=s.globalProgress+'%';
+  document.getElementById('levelValue').textContent=s.level;
+  document.getElementById('xpValue').textContent=s.xp;
+  document.getElementById('completedMissions').textContent=s.completedMissions;
+  document.getElementById('blockersValue').textContent=s.blockers;
+  document.getElementById('deadlineSub').textContent='Просрочено: '+s.overdueMissions;
+  document.getElementById('levelBadge').textContent='Уровень '+s.level;
+  document.getElementById('xpBar').style.width=s.currentLevelXp+'%';
+  document.getElementById('xpNote').textContent='До следующего уровня: '+(100-s.currentLevelXp)+' XP';
+  document.getElementById('xpSub').textContent='До следующего уровня: '+(100-s.currentLevelXp)+' XP';
+  document.getElementById('activeStageLabel').textContent=s.activeStage?.stage.title || '—';
+  document.getElementById('activeStageHint').textContent=s.activeStage?.stage.description || '—';
+  const gateText = !s.gateRules.liquidityReady ? 'Ликвидность ещё не даёт права безопасно давить трафик.' : !s.gateRules.stabilizationReady ? 'Сначала стабилизируй цены, спреды и зависшие позиции.' : !s.gateRules.arbitrageReady ? 'Нужен арбитражный слой и market makers для выравнивания рынка.' : !s.gateRules.trafficReady ? 'Трафик пока рано: рынок ещё хрупкий.' : !s.gateRules.tournamentsReady ? 'Турниры оставляем как усилитель, не как старт.' : !s.gateRules.scaleReady ? 'Основа уже собрана, но масштабирование ещё не полностью безопасно.' : 'Можно масштабировать систему.';
+  document.getElementById('launchGateLabel').textContent = 'Gate score ' + s.gateScore + '/100';
+  document.getElementById('launchGateText').textContent = gateText;
+  const todayList = s.todayList.slice(0,4);
+  document.getElementById('todayFocus').innerHTML = todayList.length ? todayList.map(m=>`<div class="side-item"><div><strong>${escapeHtml(m.title)}</strong></div><div class="small">${escapeHtml(stageById(m.stageId).short)} · ${priorityLabel(m.priority)} · ${m.progress}%</div></div>`).join('') : '<div class="side-item"><div><strong>Нет критичных точек</strong></div><div class="small">Можно двигать следующий этап.</div></div>';
+}
+
+function renderFocusList(targetId, items, emptyText, pillClass='info'){
+  document.getElementById(targetId).innerHTML = items.length ? items.map(m=>`<div class="focus-entry"><strong>${escapeHtml(m.title)}</strong><div class="small">${escapeHtml(stageById(m.stageId).short)} · ${priorityLabel(m.priority)} · ${m.progress}%</div><div class="dep-list" style="margin-top:8px"><span class="pill ${pillClass}">${m.status==='Блокер'||!m.depsReady?'gate blocked':'active line'}</span></div></div>`).join('') : `<div class="focus-entry"><strong>${emptyText}</strong><div class="small">Пусто.</div></div>`;
+}
+function renderDashboard(){
+  const s=computeStats();
+  document.getElementById('activeMissionsValue').textContent=s.activeMissions;
+  document.getElementById('blockedTasksValue').textContent=s.blockedTasks;
+  document.getElementById('avgSpreadValue').textContent=s.avgSpread.toFixed(2);
+  document.getElementById('stuckSkinsValue').textContent=s.stuckSkins;
+  document.getElementById('launchReadinessValue').textContent=s.readiness+'%';
+  document.getElementById('gateScoreValue').textContent=s.gateScore+'/100';
+  document.getElementById('liquidityCoverageValue').textContent=s.liquidityCoverage+'%';
+  document.getElementById('activeLpValue').textContent=s.activeLp;
+  document.getElementById('activeArbValue').textContent=s.activeArb;
+  renderFocusList('todayBoard', s.todayList, 'Сегодня нет критичных миссий', 'warn');
+  renderFocusList('nextBoard', s.nextList, 'Следующие миссии не выбраны', 'ok');
+  renderFocusList('blockedBoard', s.blockedList, 'Нет активных блокеров', 'danger');
+  document.getElementById('stageBars').innerHTML = s.stageStats.map(st=>`<div class="bar-row"><div class="small">${escapeHtml(st.stage.short)}</div><div class="bar-track"><div class="bar-fill" style="width:${st.progress}%"></div></div><div class="small">${st.progress}%</div></div>`).join('');
+  const deg=Math.max(0, Math.min(360, Math.round(s.readiness*3.6)));
+  document.getElementById('launchRing').style.background = `conic-gradient(#22c55e 0deg, #38bdf8 ${deg}deg, #172033 ${deg}deg 360deg)`;
+  document.getElementById('launchRingValue').textContent = s.readiness+'%';
+  const critical = state.missions.filter(m=>calculateMissionProgress(m)<100).sort((a,b)=>{ const score = x => (x.priority==='critical'?4:x.priority==='high'?3:x.priority==='medium'?2:1) + ((x.status==='Блокер'||!missionDependenciesResolved(x))?3:0); return score(b)-score(a); }).slice(0,6);
+  document.getElementById('criticalList').innerHTML = critical.length ? critical.map(m=>`<div class="timeline-item"><div class="timeline-top"><strong>${escapeHtml(m.title)}</strong><span class="pill ${m.status==='Блокер'||!missionDependenciesResolved(m)?'danger':'warn'}">${m.status==='Блокер'||!missionDependenciesResolved(m)?'Блокер':'Приоритет'}</span></div><div class="small">${escapeHtml(stageById(m.stageId).title)} · ${priorityLabel(m.priority)} · дедлайн: ${formatDate(m.due)}</div></div>`).join('') : '<div class="empty">Нет critical / blocked миссий.</div>';
+  const logs = state.logs.slice(0,8);
+  document.getElementById('recentLogs').innerHTML = logs.length ? logs.map(log=>`<div class="timeline-item"><div>${escapeHtml(log.text)}</div><div class="small">${formatDate(log.createdAt)}${log.field ? ' · '+escapeHtml(log.field) : ''}</div></div>`).join('') : '<div class="empty">История пока пустая.</div>';
+}
+
+function marketClass(type,id){ if(id==='buff') return 'main'; if(id==='selp') return 'selp'; return ''; }
+function renderStrategyMap(){
+  const stats=computeStageStats();
+  const positions={liquidity:{left:'40px',top:'80px'},stabilization:{left:'405px',top:'80px'},arbitrage:{left:'780px',top:'80px'},traffic:{left:'860px',top:'360px'},tournaments:{left:'470px',top:'360px'},scale:{left:'60px',top:'360px'}};
+  const box=document.getElementById('mapNodes');
+  box.innerHTML = stats.map(st=>{ const stageState = st.stateLabel; const extra = stageState==='active' ? 'active' : stageState==='locked' ? 'locked' : ''; const pos = positions[st.stage.id] || {left:'20px',top:'20px'}; const missionNames = st.missions.slice(0,2).map(m=>m.title).join(' · ') || 'Пока нет миссий'; return `<div class="map-node ${extra}" style="left:${pos.left};top:${pos.top}"><div class="node-tag">${stageState==='done'?'готово':stageState==='active'?'активный этап':'заблокировано'}</div><h4>${escapeHtml(st.stage.title)}</h4><div class="node-meta">${escapeHtml(st.stage.description)}</div><div class="small">Миссий: ${st.missions.length} · Блокеров: ${st.blockerCount}</div><div class="small" style="margin-top:6px">${escapeHtml(missionNames)}</div><div class="mini-progress"><div style="width:${st.progress}%"></div></div></div>`; }).join('');
+  const markets = state.strategy.markets || [];
+  const flows = state.strategy.flows || [];
+  const nodeLayer = document.getElementById('geoNodeLayer');
+  const flowLayer = document.getElementById('geoFlowLayer');
+  const geoMap = document.getElementById('geoMarketMap');
+  const width = geoMap.clientWidth || 800;
+  const height = geoMap.clientHeight || 760;
+  nodeLayer.innerHTML = markets.map(m=>`<div class="geo-node ${marketClass(m.type,m.id)}" style="left:${m.x}%;top:${m.y}%"><div class="market-name">${escapeHtml(m.name)}</div><div class="market-meta">${escapeHtml(m.region)} · ${escapeHtml(m.role||'')}</div><div class="market-stats"><div class="market-chip">fee ${Number(m.fee||0).toFixed(1)}%</div><div class="market-chip">share ${Number(m.share||0).toFixed(0)}%</div><div class="market-chip">liq ${Number(m.liquidity||0).toFixed(0)}</div><div class="market-chip">vol ${Number(m.volatility||0).toFixed(0)}</div></div></div>`).join('');
+  flowLayer.innerHTML = flows.map(f=>{ const from = markets.find(m=>m.id===f.from); const to = markets.find(m=>m.id===f.to); if(!from || !to) return ''; const x1 = width * from.x / 100; const y1 = height * from.y / 100; const x2 = width * to.x / 100; const y2 = height * to.y / 100; const midX = (x1+x2)/2; const midY = (y1+y2)/2 - 24; const curve = `M ${x1} ${y1} C ${x1+(x2-x1)*0.35} ${y1-20}, ${x1+(x2-x1)*0.65} ${y2-20}, ${x2} ${y2}`; return `<g><path d="${curve}" stroke="url(#flowGrad)" stroke-width="${Math.max(2, Number(f.volume||0)/8)}" fill="none" marker-end="url(#flowArrow)" opacity=".85"></path><rect x="${midX-82}" y="${midY-18}" width="164" height="38" rx="12" fill="rgba(2,6,23,.88)" stroke="rgba(148,163,184,.26)"></rect><text x="${midX}" y="${midY-2}" fill="#e2e8f0" font-size="12" text-anchor="middle">${escapeHtml(f.label)} · loss ${Number(f.loss||0).toFixed(1)}%</text><text x="${midX}" y="${midY+12}" fill="#94a3b8" font-size="11" text-anchor="middle">spread ${Number(f.spread||0).toFixed(1)}% · vol ${Number(f.volume||0).toFixed(0)}</text></g>`; }).join('');
+  document.getElementById('marketTableBody').innerHTML = markets.map(m=>`<tr><td><strong>${escapeHtml(m.name)}</strong><div class="small">${escapeHtml(m.region)}</div></td><td><input type="number" step="0.1" value="${escapeHtml(m.fee)}" onchange="updateMarketField('${m.id}','fee',this.value)"></td><td><input type="number" step="1" value="${escapeHtml(m.share)}" onchange="updateMarketField('${m.id}','share',this.value)"></td><td><input type="number" step="1" value="${escapeHtml(m.liquidity)}" onchange="updateMarketField('${m.id}','liquidity',this.value)"></td><td><input type="number" step="1" value="${escapeHtml(m.volatility)}" onchange="updateMarketField('${m.id}','volatility',this.value)"></td></tr>`).join('');
+  document.getElementById('flowList').innerHTML = flows.map(f=>{ const from = markets.find(m=>m.id===f.from)?.name || f.from; const to = markets.find(m=>m.id===f.to)?.name || f.to; return `<div class="flow-item"><strong>${escapeHtml(from)} → ${escapeHtml(to)}</strong><div class="small">${escapeHtml(f.label)} · потери ${Number(f.loss||0).toFixed(1)}% · spread ${Number(f.spread||0).toFixed(1)}% · объём ${Number(f.volume||0).toFixed(0)}</div><div class="small" style="margin-top:6px">${escapeHtml(f.note||'')}</div></div>`; }).join('');
+  const buff = markets.find(m=>m.id==='buff');
+  const avgFee = markets.length ? markets.reduce((sum,m)=>sum+Number(m.fee||0),0)/markets.length : 0;
+  const routeLoss = flows.length ? flows.reduce((sum,f)=>sum+Number(f.loss||0),0)/flows.length : 0;
+  document.getElementById('buffDominanceValue').textContent = `${Number(buff?.share||0).toFixed(0)}%`;
+  document.getElementById('avgFeeValue').textContent = `${avgFee.toFixed(1)}%`;
+  document.getElementById('routeLossValue').textContent = `${routeLoss.toFixed(1)}%`;
+}
+
+function renderStageSidebar(){
+  const stageStats=computeStageStats();
+  document.getElementById('stageSidebar').innerHTML = stageStats.map(st=>`
+    <div class="side-item">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <strong>${escapeHtml(st.stage.short)}</strong>
+        <span class="pill ${st.stateLabel==='done'?'ok':st.stateLabel==='active'?'warn':'info'}">${st.progress}%</span>
+      </div>
+      <div class="small" style="margin-top:6px">${escapeHtml(st.stage.description)}</div>
+    </div>
+  `).join('');
+}
+
+function filteredMissions(){
+  const q=document.getElementById('searchInput').value.toLowerCase().trim();
+  const status=document.getElementById('statusFilter').value;
+  const priority=document.getElementById('priorityFilter').value;
+  const stageId=document.getElementById('stageFilter').value;
+
+  return state.missions.filter(m=>{
+    const blob=[m.phase,m.title,m.status,m.notes,stageById(m.stageId).title,priorityLabel(m.priority),...m.tasks.map(t=>`${t.text} ${taskStatusLabel(t.status)} ${t.comment||''}`)].join(' ').toLowerCase();
+    const okQ=!q||blob.includes(q);
+    const okStatus=status==='all'||m.status===status;
+    const okPriority=priority==='all'||m.priority===priority;
+    const okStage=stageId==='all'||m.stageId===stageId;
+    return okQ&&okStatus&&okPriority&&okStage;
+  });
+}
+
+function renderMissionDependencies(m){
+  const deps = (m.dependsOn||[]).map(id=>state.missions.find(x=>x.id===id)).filter(Boolean);
+  if(!deps.length) return '<div class="small">Зависимостей нет</div>';
+  return `<div class="dep-list">${deps.map(dep=>`<span class="pill ${calculateMissionProgress(dep)===100?'ok':'danger'}">${escapeHtml(dep.title)}</span>`).join('')}</div>`;
+}
+
+function renderMissions(){
+  const box=document.getElementById('missionsList');
+  const filtered=filteredMissions();
+  if(!filtered.length){box.innerHTML='<div class="card">Ничего не найдено.</div>';return}
+  box.innerHTML=filtered.map((m,idx)=>{
+    const progress=calculateMissionProgress(m);
+    const depsReady=missionDependenciesResolved(m);
+    const taskProgressDone = m.tasks.filter(t=>t.status==='done').length;
+    const blockedTasks = m.tasks.filter(t=>t.status==='blocked').length;
+    return `
+      <article class="mission">
+        <div class="mission-top">
+          <div>
+            <div class="phase">${escapeHtml(m.phase||'Без фазы')} · ${escapeHtml(stageById(m.stageId).title)}</div>
+            <div class="title-row">
+              <div class="title">${idx+1}. ${escapeHtml(m.title||'Без названия')}</div>
+            </div>
+          </div>
+          <div class="badges">
+            <div class="badge ${missionStatusClass(m.status)}">${escapeHtml(m.status)}</div>
+            <div class="badge priority-${m.priority}">${priorityLabel(m.priority)}</div>
+            <div class="badge">Прогресс ${progress}%</div>
+          </div>
+        </div>
+
+        <div class="progress"><div style="width:${progress}%"></div></div>
+
+        <div class="mission-meta">
+          <div class="meta-box">
+            <div class="small">Дедлайн</div>
+            <input type="date" value="${escapeHtml(m.due||'')}" onchange="updateMissionField('${m.id}','due',this.value)">
+          </div>
+          <div class="meta-box">
+            <div class="small">Статус</div>
+            <select onchange="updateMissionField('${m.id}','status',this.value)">
+              ${['Не начато','В работе','Готово','Блокер'].map(st=>`<option ${m.status===st?'selected':''}>${st}</option>`).join('')}
+            </select>
+          </div>
+          <div class="meta-box">
+            <div class="small">Итог по задачам</div>
+            <div style="margin-top:8px"><span class="pill ok">${taskProgressDone}/${m.tasks.length||0} готово</span> <span class="pill ${blockedTasks?'danger':'info'}">${blockedTasks} блок.</span></div>
+          </div>
+          <div class="meta-box">
+            <div class="small">Действия</div>
+            <div class="actions" style="margin-top:8px">
+              <button onclick="openEditMission('${m.id}')">Изменить</button>
+              <button class="btn-blue" onclick="openNewTask('${m.id}')">+ Подзадача</button>
+              <button class="btn-danger" onclick="deleteMission('${m.id}')">Удалить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-box">
+          <div class="small">Зависимости</div>
+          ${renderMissionDependencies(m)}
+          ${depsReady ? '' : '<div class="small" style="margin-top:8px;color:#fecaca">Эта миссия заблокирована, пока не закрыты зависимые миссии.</div>'}
+        </div>
+
+        <div class="task-list" style="margin-top:14px">
+          ${m.tasks.map(t=>`
+            <div class="task ${t.status==='done'?'done':''} ${t.status==='blocked'?'blocked':''}">
+              <div class="task-text">
+                <strong>${escapeHtml(t.text)}</strong>
+                <div class="small">дедлайн: ${formatDate(t.deadline)}${t.comment ? ' · '+escapeHtml(t.comment) : ''}</div>
+              </div>
+              <div class="task-meta-right">
+                <select onchange="updateTaskField('${m.id}','${t.id}','status',this.value)">
+                  ${['not_started','in_progress','blocked','done'].map(st=>`<option value="${st}" ${t.status===st?'selected':''}>${taskStatusLabel(st)}</option>`).join('')}
+                </select>
+                <span class="badge ${taskStatusColor(t.status)}">${taskStatusLabel(t.status)}</span>
+              </div>
+              <div class="actions">
+                <button onclick="openEditTask('${m.id}','${t.id}')">Изменить</button>
+                <button class="btn-danger" onclick="deleteTask('${m.id}','${t.id}')">Удалить</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div style="margin-top:14px">
+          <div class="small">Комментарий</div>
+          <textarea onchange="updateMissionField('${m.id}','notes',this.value)">${escapeHtml(m.notes||'')}</textarea>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function getBasketStats(){
+  const items = state.liquidityBasket || [];
+  const sku = items.length;
+  const qty = items.reduce((sum,item)=>sum + Number(item.quantity||0),0);
+  const buyTotal = items.reduce((sum,item)=>sum + Number(item.buyPrice||0) * Number(item.quantity||0),0);
+  const sellTotal = items.reduce((sum,item)=>sum + Number(item.targetSellPrice||0) * Number(item.quantity||0),0);
+  return {
+    sku,
+    qty,
+    buyTotal:Number(buyTotal.toFixed(2)),
+    sellTotal:Number(sellTotal.toFixed(2)),
+    pnl:Number((sellTotal-buyTotal).toFixed(2))
+  };
+}
+
+function filteredBuffCatalog(){
+  const q=(document.getElementById('buffSearchInput')?.value||'').toLowerCase().trim();
+  const game=document.getElementById('buffGameFilter')?.value||'all';
+  const minLiquidity=document.getElementById('buffLiquidityFilter')?.value||'all';
+  return (state.buffCatalog||[]).filter(item=>{
+    const searchBlob = [item.game,item.item,item.sourceId,item.notes,item.wear].join(' ').toLowerCase();
+    const qOk = !q || searchBlob.includes(q);
+    const gameOk = game==='all' || item.game===game;
+    const liqOk = minLiquidity==='all' || Number(item.liquidityScore||0) >= Number(minLiquidity);
+    return qOk && gameOk && liqOk;
+  });
+}
+
+function renderBuffConnector(){
+  const cfg = state.buffConnector || normalizeBuffConnector();
+  if(document.getElementById('buffEndpoint')) document.getElementById('buffEndpoint').value = cfg.endpoint || '';
+  if(document.getElementById('buffApiKey')) document.getElementById('buffApiKey').value = cfg.apiKey || '';
+  if(document.getElementById('buffImportMode')) document.getElementById('buffImportMode').value = cfg.mode || 'mock';
+  document.getElementById('buffLastSync').textContent = cfg.lastSyncAt ? formatDate(cfg.lastSyncAt) : '—';
+  document.getElementById('buffModeView').textContent = cfg.mode || 'mock';
+}
+
+function renderBuffCatalog(){
+  const body=document.getElementById('buffCatalogBody');
+  const rows=filteredBuffCatalog();
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="9">Каталог пуст. Нажми demo data, sync BUFF API или импортируй JSON.</td></tr>';
+    return;
+  }
+  body.innerHTML = rows.map(item=>{
+    const spread = Number((Number(item.targetSellPrice||0) - Number(item.buffPrice||0)).toFixed(2));
+    return `
+      <tr>
+        <td>${escapeHtml(item.game)}</td>
+        <td><strong>${escapeHtml(item.item)}</strong><div class="small">${escapeHtml(item.wear||'')}</div></td>
+        <td>${Number(item.buffPrice||0).toFixed(2)}</td>
+        <td>${Number(item.targetSellPrice||0).toFixed(2)}</td>
+        <td>${spread.toFixed(2)}</td>
+        <td>${Number(item.liquidityScore||0)}</td>
+        <td>${Number(item.volume24h||0)}</td>
+        <td><span class="mono small">${escapeHtml(item.sourceId||'—')}</span></td>
+        <td>
+          <div class="actions">
+            <button class="btn-blue" onclick="addCatalogItemToBasket('${item.id}')">В корзину</button>
+            <button onclick="addCatalogItemToPositions('${item.id}')">В позиции</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderBasket(){
+  const stats=getBasketStats();
+  document.getElementById('basketItemsCount').textContent=stats.sku;
+  document.getElementById('basketBuyTotal').textContent=stats.buyTotal.toFixed(2);
+  document.getElementById('basketSellTotal').textContent=stats.sellTotal.toFixed(2);
+  document.getElementById('basketSkuValue').textContent=stats.sku;
+  document.getElementById('basketQtyValue').textContent=stats.qty;
+  document.getElementById('basketPnlValue').textContent=stats.pnl.toFixed(2);
+
+  const box=document.getElementById('basketList');
+  const items=state.liquidityBasket||[];
+  if(!items.length){
+    box.innerHTML='<div class="soft-card">Корзина пока пустая. Набирай скины из BUFF catalog.</div>';
+    return;
+  }
+  box.innerHTML = items.map(item=>{
+    const pnl = (Number(item.targetSellPrice||0)-Number(item.buyPrice||0))*Number(item.quantity||0);
+    return `
+      <div class="basket-item">
+        <div class="split-label">
+          <div>
+            <strong>${escapeHtml(item.item)}</strong>
+            <div class="small">${escapeHtml(item.game)} · source: <span class="mono">${escapeHtml(item.sourceId||'—')}</span></div>
+          </div>
+          <span class="skin-chip">liq ${Number(item.liquidityScore||0)}</span>
+        </div>
+        <div class="actions" style="margin-top:10px">
+          <label class="small">Qty <input class="inline-input" type="number" min="1" step="1" value="${Number(item.quantity||1)}" onchange="updateBasketQty('${item.id}', this.value)"></label>
+          <span class="skin-chip">buy ${Number(item.buyPrice||0).toFixed(2)}</span>
+          <span class="skin-chip">sell ${Number(item.targetSellPrice||0).toFixed(2)}</span>
+          <span class="skin-chip">PnL ${Number(pnl||0).toFixed(2)}</span>
+          <button onclick="promoteBasketToPosition('${item.id}')">В позиции</button>
+          <button class="btn-danger" onclick="removeBasketItem('${item.id}')">Удалить</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderManagedSkins(){
+  const body=document.getElementById('skinsBody');
+  if(!state.skins.length){
+    body.innerHTML='<tr><td colspan="12">Пока нет управляемых позиций.</td></tr>';
+  } else {
+    body.innerHTML=state.skins.map(s=>{
+      const spread=spreadValue(s).toFixed(2);
+      const margin=marginValue(s).toFixed(1);
+      return `
+        <tr>
+          <td><input value="${escapeHtml(s.game)}" onchange="updateSkinField('${s.id}','game',this.value)"></td>
+          <td><input value="${escapeHtml(s.item)}" onchange="updateSkinField('${s.id}','item',this.value)"></td>
+          <td><input value="${escapeHtml(s.buyPlatform)}" onchange="updateSkinField('${s.id}','buyPlatform',this.value)"></td>
+          <td><input type="number" step="0.01" value="${escapeHtml(s.buyPrice)}" onchange="updateSkinField('${s.id}','buyPrice',this.value)"></td>
+          <td><input type="number" step="0.01" value="${escapeHtml(s.sellPrice)}" onchange="updateSkinField('${s.id}','sellPrice',this.value)"></td>
+          <td>${spread}</td>
+          <td>${margin}%</td>
+          <td><input class="inline-input" type="number" step="1" min="1" value="${Number(s.quantity||1)}" onchange="updateSkinField('${s.id}','quantity',this.value)"></td>
+          <td><input type="checkbox" ${s.inBasket?'checked':''} onchange="updateSkinField('${s.id}','inBasket',this.checked)"></td>
+          <td>
+            <select onchange="updateSkinField('${s.id}','status',this.value)">
+              ${['Новая позиция','Куплено','Выставлено','Продано','Зависло'].map(st=>`<option ${s.status===st?'selected':''}>${st}</option>`).join('')}
+            </select>
+          </td>
+          <td><input value="${escapeHtml(s.comment)}" onchange="updateSkinField('${s.id}','comment',this.value)"><div class="small mono">${escapeHtml(s.sourceId||'')}</div></td>
+          <td><button class="btn-danger" onclick="deleteSkin('${s.id}')">Удалить</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  const spreads=state.skins.map(spreadValue);
+  const avg=spreads.length ? spreads.reduce((a,b)=>a+b,0)/spreads.length : 0;
+  const total=state.skins.reduce((sum,s)=>sum + spreadValue(s)*Number(s.quantity||1),0);
+  document.getElementById('skinCount').textContent=state.skins.length;
+  document.getElementById('skinAvgSpread').textContent=avg.toFixed(2);
+  document.getElementById('skinPotentialProfit').textContent=total.toFixed(2);
+}
+
+function renderSkins(){
+  renderBuffConnector();
+  renderBuffCatalog();
+  renderBasket();
+  renderManagedSkins();
+}
+
+function renderLogs(){
+  const logs = state.logs.length ? state.logs : [{text:'Система инициализирована',createdAt:nowIso()}];
+  document.getElementById('logsList').innerHTML = logs.map(log=>`
+    <div class="timeline-item">
+      <div>${escapeHtml(log.text)}</div>
+      <div class="small">${formatDate(log.createdAt)}</div>
+    </div>
+  `).join('');
+}
+
+function bindTabs(){
+  document.querySelectorAll('.tab').forEach(btn=>{
+    btn.onclick=()=>{
+      currentTab=btn.dataset.tab;
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      ['dashboard','strategy','missions','skins','logs','guide'].forEach(name=>{
+        document.getElementById(name+'Tab').classList.add('hidden');
+      });
+      document.getElementById(currentTab+'Tab').classList.remove('hidden');
+    }
+  });
+}
+
+function updateMissionField(id,field,value){
+  const mission=state.missions.find(m=>m.id===id);
+  if(!mission) return;
+  const oldValue = mission[field];
+  mission[field]=value;
+  mission.updatedAt=nowIso();
+  saveState();
+  logChange('mission', mission.title, field, oldValue, value);
+  render();
+}
+window.updateMissionField=updateMissionField;
+
+function updateTaskField(missionId,taskId,field,value){
+  const mission=state.missions.find(m=>m.id===missionId);
+  if(!mission) return;
+  const task=mission.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  const oldValue = task[field];
+  task[field]=value;
+  mission.updatedAt=nowIso();
+  saveState();
+  logChange('task', task.text, field, oldValue, value);
+  render();
+}
+window.updateTaskField=updateTaskField;
+
+function openNewTask(missionId){
+  editingTaskMissionId=missionId;
+  editingTaskId=null;
+  document.getElementById('taskModalTitle').textContent='Новая подзадача';
+  document.getElementById('taskText').value='';
+  document.getElementById('taskStatus').value='not_started';
+  document.getElementById('taskDeadline').value='';
+  document.getElementById('taskComment').value='';
+  document.getElementById('taskModal').classList.add('show');
+}
+window.openNewTask=openNewTask;
+
+function openEditTask(missionId,taskId){
+  const mission=state.missions.find(m=>m.id===missionId);
+  const task=mission && mission.tasks.find(t=>t.id===taskId);
+  if(!task) return;
+  editingTaskMissionId=missionId;
+  editingTaskId=taskId;
+  document.getElementById('taskModalTitle').textContent='Изменить подзадачу';
+  document.getElementById('taskText').value=task.text||'';
+  document.getElementById('taskStatus').value=task.status||'not_started';
+  document.getElementById('taskDeadline').value=task.deadline||'';
+  document.getElementById('taskComment').value=task.comment||'';
+  document.getElementById('taskModal').classList.add('show');
+}
+window.openEditTask=openEditTask;
+
+function closeTaskModal(){document.getElementById('taskModal').classList.remove('show')}
+
+function saveTask(){
+  const text=document.getElementById('taskText').value.trim();
+  if(!text){alert('Укажи текст подзадачи'); return}
+  const mission=state.missions.find(m=>m.id===editingTaskMissionId);
+  if(!mission) return;
+  const payload={
+    text,
+    status:document.getElementById('taskStatus').value,
+    deadline:document.getElementById('taskDeadline').value,
+    comment:document.getElementById('taskComment').value.trim()
+  };
+  if(editingTaskId){
+    const task=mission.tasks.find(t=>t.id===editingTaskId);
+    Object.assign(task,payload);
+    logAction(`Изменена подзадача "${payload.text}"`);
+  } else {
+    mission.tasks.push({id:cryptoRandom(),...payload});
+    logAction(`Добавлена подзадача "${payload.text}"`);
+  }
+  mission.updatedAt=nowIso();
+  saveState();
+  closeTaskModal();
+  render();
+}
+
+function deleteTask(missionId,taskId){
+  if(!confirm('Удалить подзадачу?')) return;
+  const mission=state.missions.find(m=>m.id===missionId);
+  if(!mission) return;
+  const task=mission.tasks.find(t=>t.id===taskId);
+  mission.tasks=mission.tasks.filter(t=>t.id!==taskId);
+  mission.updatedAt=nowIso();
+  saveState();
+  logAction(`Удалена подзадача "${task?.text||''}"`);
+  render();
+}
+window.deleteTask=deleteTask;
+
+function deleteMission(id){
+  if(!confirm('Удалить миссию?')) return;
+  const mission=state.missions.find(m=>m.id===id);
+  state.missions=state.missions.filter(m=>m.id!==id);
+  state.missions.forEach(m=>m.dependsOn=(m.dependsOn||[]).filter(dep=>dep!==id));
+  saveState();
+  logAction(`Удалена миссия "${mission?.title||''}"`);
+  render();
+}
+window.deleteMission=deleteMission;
+
+function renderDependencySelector(excludeId=null, selected=[]){
+  const el=document.getElementById('missionDependencies');
+  const missions=state.missions.filter(m=>m.id!==excludeId);
+  el.innerHTML = missions.length ? missions.map(m=>`
+    <label class="checkbox-item">
+      <input type="checkbox" value="${m.id}" ${selected.includes(m.id)?'checked':''}>
+      <span><strong>${escapeHtml(m.title)}</strong><br><span class="small">${escapeHtml(stageById(m.stageId).short)}</span></span>
+    </label>
+  `).join('') : '<div class="small">Пока нет других миссий для зависимостей.</div>';
+}
+
+function selectedDependencies(){
+  return [...document.querySelectorAll('#missionDependencies input[type="checkbox"]:checked')].map(x=>x.value);
+}
+
+function openEditMission(id){
+  const m=state.missions.find(x=>x.id===id);
+  if(!m) return;
+  editingMissionId=id;
+  document.getElementById('missionModalTitle').textContent='Изменить миссию';
+  document.getElementById('missionStage').value=m.stageId||'liquidity';
+  document.getElementById('missionPhase').value=m.phase||'';
+  document.getElementById('missionTitle').value=m.title||'';
+  document.getElementById('missionStatus').value=m.status||'Не начато';
+  document.getElementById('missionPriority').value=m.priority||'medium';
+  document.getElementById('missionDate').value=m.due||'';
+  document.getElementById('missionNotes').value=m.notes||'';
+  renderDependencySelector(id, m.dependsOn||[]);
+  document.getElementById('missionModal').classList.add('show');
+}
+window.openEditMission=openEditMission;
+
+function openNewMission(){
+  editingMissionId=null;
+  document.getElementById('missionModalTitle').textContent='Новая миссия';
+  document.getElementById('missionStage').value='liquidity';
+  document.getElementById('missionPhase').value='';
+  document.getElementById('missionTitle').value='';
+  document.getElementById('missionStatus').value='Не начато';
+  document.getElementById('missionPriority').value='medium';
+  document.getElementById('missionDate').value='';
+  document.getElementById('missionNotes').value='';
+  renderDependencySelector(null, []);
+  document.getElementById('missionModal').classList.add('show');
+}
+
+function closeMissionModal(){document.getElementById('missionModal').classList.remove('show')}
+
+function saveMission(){
+  const payload={
+    stageId:document.getElementById('missionStage').value,
+    phase:document.getElementById('missionPhase').value.trim(),
+    title:document.getElementById('missionTitle').value.trim(),
+    status:document.getElementById('missionStatus').value,
+    priority:document.getElementById('missionPriority').value,
+    due:document.getElementById('missionDate').value,
+    notes:document.getElementById('missionNotes').value.trim(),
+    dependsOn:selectedDependencies()
+  };
+  if(!payload.title){alert('Укажи название миссии'); return}
+  if(editingMissionId){
+    const m=state.missions.find(x=>x.id===editingMissionId);
+    Object.assign(m,payload,{updatedAt:nowIso()});
+    logAction(`Изменена миссия "${payload.title}"`);
+  }else{
+    state.missions.unshift({id:cryptoRandom(),...payload,createdAt:nowIso(),updatedAt:nowIso(),tasks:[]});
+    logAction(`Добавлена миссия "${payload.title}"`);
+  }
+  saveState();
+  closeMissionModal();
+  render();
+}
+
+function openNewSkin(){
+  editingSkinId=null;
+  document.getElementById('skinModalTitle').textContent='Новая позиция';
+  document.getElementById('skinGame').value='';
+  document.getElementById('skinItem').value='';
+  document.getElementById('skinPlatform').value='BUFF';
+  document.getElementById('skinBuyPrice').value='';
+  document.getElementById('skinSellPrice').value='';
+  document.getElementById('skinQuantity').value='1';
+  document.getElementById('skinStatus').value='Новая позиция';
+  document.getElementById('skinInBasket').value='true';
+  document.getElementById('skinSourceId').value='';
+  document.getElementById('skinComment').value='';
+  document.getElementById('skinModal').classList.add('show');
+}
+function closeSkinModal(){document.getElementById('skinModal').classList.remove('show')}
+
+function syncBasketFromSkins(){
+  state.liquidityBasket = state.skins.filter(s=>s.inBasket).map(s=>({
+    id:`basket-${s.id}`,
+    catalogId:'',
+    game:s.game,
+    item:s.item,
+    buyPrice:Number(s.buyPrice||0),
+    targetSellPrice:Number(s.sellPrice||0),
+    quantity:Number(s.quantity||1),
+    liquidityScore:0,
+    sourceId:s.sourceId||''
+  }));
+}
+
+function saveSkin(){
+  const payload={
+    game:document.getElementById('skinGame').value.trim(),
+    item:document.getElementById('skinItem').value.trim(),
+    buyPlatform:document.getElementById('skinPlatform').value.trim(),
+    buyPrice:document.getElementById('skinBuyPrice').value,
+    sellPrice:document.getElementById('skinSellPrice').value,
+    quantity:Number(document.getElementById('skinQuantity').value||1),
+    status:document.getElementById('skinStatus').value,
+    inBasket:document.getElementById('skinInBasket').value==='true',
+    sourceId:document.getElementById('skinSourceId').value.trim(),
+    comment:document.getElementById('skinComment').value.trim()
+  };
+  if(!payload.item){alert('Укажи название предмета'); return}
+  if(editingSkinId){
+    const s=state.skins.find(x=>x.id===editingSkinId);
+    Object.assign(s,payload);
+    logAction(`Изменена позиция "${payload.item}"`);
+  } else {
+    state.skins.unshift({id:cryptoRandom(),...payload});
+    logAction(`Добавлена позиция "${payload.item}"`);
+  }
+  syncBasketFromSkins();
+  saveState();
+  closeSkinModal();
+  render();
+}
+
+function updateSkinField(id,field,value){
+  const skin=state.skins.find(s=>s.id===id);
+  if(!skin) return;
+  const oldValue = skin[field];
+  if(['buyPrice','sellPrice','quantity'].includes(field)) skin[field]=Number(value||0);
+  else if(field==='inBasket') skin[field]=Boolean(value);
+  else skin[field]=value;
+  syncBasketFromSkins();
+  saveState();
+  logChange('skin', skin.item, field, oldValue, skin[field]);
+  render();
+}
+window.updateSkinField=updateSkinField;
+
+function deleteSkin(id){
+  if(!confirm('Удалить позицию?')) return;
+  const skin=state.skins.find(s=>s.id===id);
+  state.skins=state.skins.filter(s=>s.id!==id);
+  syncBasketFromSkins();
+  saveState();
+  logAction(`Удалена позиция "${skin?.item||''}"`);
+  render();
+}
+window.deleteSkin=deleteSkin;
+
+function saveBuffConnectorSettings(){
+  const next = {
+    endpoint:document.getElementById('buffEndpoint').value.trim(),
+    apiKey:document.getElementById('buffApiKey').value.trim(),
+    mode:document.getElementById('buffImportMode').value
+  };
+  const old = {...state.buffConnector};
+  state.buffConnector = {...state.buffConnector, ...next};
+  saveState();
+  logChange('buffConnector','BUFF connector','settings', old, state.buffConnector);
+  render();
+}
+
+function getMockBuffCatalog(){
+  return normalizeBuffCatalog([
+    {game:'CS2',item:'M4A1-S | Printstream (FT)',buffPrice:288,targetSellPrice:309.5,liquidityScore:89,volume24h:72,sourceId:'buff-m4-printstream-ft',wear:'FT',notes:'Высокий спрос'},
+    {game:'CS2',item:'AK-47 | Redline (FT)',buffPrice:122.5,targetSellPrice:133.8,liquidityScore:92,volume24h:148,sourceId:'buff-ak-redline-ft',wear:'FT',notes:'Якорная ликвидность'},
+    {game:'CS2',item:'USP-S | Cortex (MW)',buffPrice:54.2,targetSellPrice:61.8,liquidityScore:74,volume24h:96,sourceId:'buff-usps-cortex-mw',wear:'MW',notes:'Быстрый оборот'},
+    {game:'Rust',item:'Tempered AK47',buffPrice:44.6,targetSellPrice:49.9,liquidityScore:73,volume24h:31,sourceId:'buff-rust-ak-temp',wear:'',notes:'Проверить скорость оборота'},
+    {game:'Dota 2',item:'Inscribed Demon Eater',buffPrice:88.2,targetSellPrice:95.4,liquidityScore:61,volume24h:17,sourceId:'buff-dota-demon',wear:'',notes:'Средняя ликвидность'}
+  ]);
+}
+
+async function syncBuffCatalog(){
+  const cfg = state.buffConnector || normalizeBuffConnector();
+  try{
+    if(cfg.mode==='mock' || !cfg.endpoint){
+      state.buffCatalog = getMockBuffCatalog();
+      state.buffConnector.lastSyncAt = nowIso();
+      saveState();
+      logAction('Загружен demo catalog для BUFF');
+      render();
+      return;
+    }
+    const headers = {};
+    if(cfg.apiKey) headers['Authorization'] = `Bearer ${cfg.apiKey}`;
+    const response = await fetch(cfg.endpoint, {headers});
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const items = Array.isArray(data) ? data : (data.items || data.results || []);
+    state.buffCatalog = normalizeBuffCatalog(items);
+    state.buffConnector.lastSyncAt = nowIso();
+    saveState();
+    logAction(`Синхронизирован BUFF catalog: ${state.buffCatalog.length} items`);
+    render();
+  }catch(err){
+    alert('Не удалось получить BUFF catalog. Для GitHub Pages используй свой proxy endpoint или импорт JSON вручную.');
+    console.error(err);
+  }
+}
+
+function importBuffJson(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(String(reader.result||'{}'));
+      const items = Array.isArray(parsed) ? parsed : (parsed.items || parsed.results || []);
+      state.buffCatalog = normalizeBuffCatalog(items);
+      state.buffConnector.lastSyncAt = nowIso();
+      state.buffConnector.mode = 'manual_json';
+      saveState();
+      logAction(`Импортирован BUFF JSON "${file.name}"`);
+      render();
+    }catch(err){
+      alert('Не удалось импортировать BUFF JSON');
+    }
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+function addCatalogItemToBasket(catalogId){
+  const item = (state.buffCatalog||[]).find(x=>x.id===catalogId);
+  if(!item) return;
+  const existing = state.liquidityBasket.find(x=>x.sourceId===item.sourceId || x.catalogId===catalogId);
+  if(existing){
+    existing.quantity = Number(existing.quantity||1)+1;
+  }else{
+    state.liquidityBasket.unshift({
+      id:cryptoRandom(),
+      catalogId:item.id,
+      game:item.game,
+      item:item.item,
+      buyPrice:Number(item.buffPrice||0),
+      targetSellPrice:Number(item.targetSellPrice||0),
+      quantity:1,
+      liquidityScore:Number(item.liquidityScore||0),
+      sourceId:item.sourceId||''
+    });
+  }
+  saveState();
+  logAction(`Добавлен в корзину ликвидности "${item.item}"`);
+  render();
+}
+window.addCatalogItemToBasket=addCatalogItemToBasket;
+
+function addCatalogItemToPositions(catalogId){
+  const item = (state.buffCatalog||[]).find(x=>x.id===catalogId);
+  if(!item) return;
+  state.skins.unshift(normalizeSkin({
+    id:cryptoRandom(),
+    game:item.game,
+    item:item.item,
+    buyPlatform:'BUFF',
+    buyPrice:item.buffPrice,
+    sellPrice:item.targetSellPrice,
+    quantity:1,
+    status:'Новая позиция',
+    inBasket:true,
+    sourceId:item.sourceId||'',
+    comment:item.notes||''
+  }));
+  syncBasketFromSkins();
+  saveState();
+  logAction(`Добавлена управляемая позиция из BUFF "${item.item}"`);
+  render();
+}
+window.addCatalogItemToPositions=addCatalogItemToPositions;
+
+function updateBasketQty(id,value){
+  const item = state.liquidityBasket.find(x=>x.id===id);
+  if(!item) return;
+  const oldValue = item.quantity;
+  item.quantity = Math.max(1, Number(value||1));
+  saveState();
+  logChange('basket', item.item, 'quantity', oldValue, item.quantity);
+  render();
+}
+window.updateBasketQty=updateBasketQty;
+
+function removeBasketItem(id){
+  const item = state.liquidityBasket.find(x=>x.id===id);
+  state.liquidityBasket = state.liquidityBasket.filter(x=>x.id!==id);
+  saveState();
+  logAction(`Удалён из корзины "${item?.item||''}"`);
+  render();
+}
+window.removeBasketItem=removeBasketItem;
+
+function promoteBasketToPosition(id){
+  const item = state.liquidityBasket.find(x=>x.id===id);
+  if(!item) return;
+  state.skins.unshift(normalizeSkin({
+    game:item.game,
+    item:item.item,
+    buyPlatform:'BUFF',
+    buyPrice:item.buyPrice,
+    sellPrice:item.targetSellPrice,
+    quantity:item.quantity,
+    status:'Новая позиция',
+    inBasket:true,
+    sourceId:item.sourceId||'',
+    comment:'Добавлено из корзины ликвидности'
+  }));
+  syncBasketFromSkins();
+  saveState();
+  logAction(`Корзина → позиция: "${item.item}"`);
+  render();
+}
+window.promoteBasketToPosition=promoteBasketToPosition;
+
+function clearBasket(){
+  if(!confirm('Очистить корзину ликвидности?')) return;
+  state.liquidityBasket = [];
+  state.skins = state.skins.map(s=>({...s, inBasket:false}));
+  saveState();
+  logAction('Корзина ликвидности очищена');
+  render();
+}
+
+
+function exportJson(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='selp-market-tracker-v3.json';
+  a.click();
+  logAction('Экспортирован JSON файл');
+}
+
+function importJson(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data.missions || !data.skins) throw new Error('bad');
+      state={
+        missions:data.missions.map(normalizeMission),
+        skins:data.skins.map(normalizeSkin),
+        buffConnector:normalizeBuffConnector(data.buffConnector||{}),
+        buffCatalog:normalizeBuffCatalog(data.buffCatalog||[]),
+        liquidityBasket:normalizeBasket(data.liquidityBasket||[]),
+        strategy:normalizeStrategy(data.strategy||{}),
+        logs:Array.isArray(data.logs)?data.logs:[]
+      };
+      saveState();
+      logAction(`Импортирован JSON файл "${file.name}"`);
+      render();
+      alert('Импорт выполнен');
+    }catch(e){ alert('Не удалось импортировать JSON') }
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+function exportCsv(){
+  const rows=[['game','item','buyPlatform','buyPrice','sellPrice','status','comment','quantity','inBasket','sourceId'],...state.skins.map(s=>[s.game,s.item,s.buyPlatform,s.buyPrice,s.sellPrice,s.status,s.comment,s.quantity,s.inBasket,s.sourceId])];
+  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='selp-market-skins.csv';
+  a.click();
+  logAction('Экспортирован CSV файл позиций');
+}
+
+function exportBasketCsv(){
+  const rows=[['game','item','buyPrice','targetSellPrice','quantity','liquidityScore','sourceId'],...(state.liquidityBasket||[]).map(s=>[s.game,s.item,s.buyPrice,s.targetSellPrice,s.quantity,s.liquidityScore,s.sourceId])];
+  const csv=rows.map(r=>r.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='selp-market-liquidity-basket.csv';
+  a.click();
+  logAction('Экспортирована корзина ликвидности CSV');
+}
+
+function parseCsvLine(line){
+  const out=[]; let cur=''; let q=false;
+  for(let i=0;i<line.length;i++){
+    const ch=line[i];
+    if(ch==='"'){ if(q&&line[i+1]==='"'){cur+='"'; i++} else q=!q }
+    else if(ch===','&&!q){ out.push(cur); cur='' }
+    else cur+=ch
+  }
+  out.push(cur);
+  return out;
+}
+
+function importCsv(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const text=String(reader.result||'').trim();
+    const lines=text.split(/\r?\n/).filter(Boolean);
+    if(lines.length<2){ alert('CSV пустой'); return }
+    const parsed=[];
+    for(let i=1;i<lines.length;i++){
+      const cols=parseCsvLine(lines[i]);
+      parsed.push(normalizeSkin({
+        id:cryptoRandom(),
+        game:cols[0]||'',
+        item:cols[1]||'',
+        buyPlatform:cols[2]||'',
+        buyPrice:cols[3]||'',
+        sellPrice:cols[4]||'',
+        status:cols[5]||'Новая позиция',
+        comment:cols[6]||'',
+        quantity:cols[7]||1,
+        inBasket:String(cols[8]||'false')==='true',
+        sourceId:cols[9]||''
+      }));
+    }
+    state.skins=parsed.concat(state.skins);
+    syncBasketFromSkins();
+    saveState();
+    logAction(`Импортирован CSV файл "${file.name}"`);
+    render();
+    alert('CSV импортирован');
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+function updateMarketField(id,field,value){ const market = state.strategy.markets.find(m=>m.id===id); if(!market) return; const oldValue = market[field]; market[field] = ['fee','share','liquidity','volatility','x','y'].includes(field) ? Number(value) : value; saveState(); logChange('market', market.name, field, oldValue, market[field]); render(); }
+window.updateMarketField=updateMarketField;
+
+function render(){
+  renderHeader();
+  renderDashboard();
+  renderStrategyMap();
+  renderMissions();
+  renderStageSidebar();
+  renderSkins();
+  renderLogs();
+  bindTabs();
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===currentTab));
+  ['dashboard','strategy','missions','skins','logs','guide'].forEach(name=>{
+    document.getElementById(name+'Tab').classList.toggle('hidden', name!==currentTab);
+  });
+}
+
+populateStaticSelectors();
+if(!state.logs.length){ logAction('Система v5 инициализирована') }
+
+document.getElementById('searchInput').addEventListener('input',renderMissions);
+document.getElementById('stageFilter').addEventListener('change',renderMissions);
+document.getElementById('statusFilter').addEventListener('change',renderMissions);
+document.getElementById('priorityFilter').addEventListener('change',renderMissions);
+document.getElementById('addMissionBtn').addEventListener('click',openNewMission);
+document.getElementById('closeMissionModal').addEventListener('click',closeMissionModal);
+document.getElementById('saveMissionBtn').addEventListener('click',saveMission);
+
+document.getElementById('closeTaskModal').addEventListener('click',closeTaskModal);
+document.getElementById('saveTaskBtn').addEventListener('click',saveTask);
+
+document.getElementById('addSkinBtn').addEventListener('click',openNewSkin);
+document.getElementById('closeSkinModal').addEventListener('click',closeSkinModal);
+document.getElementById('saveSkinBtn').addEventListener('click',saveSkin);
+document.getElementById('saveBuffSettingsBtn').addEventListener('click',saveBuffConnectorSettings);
+document.getElementById('loadBuffMockBtn').addEventListener('click',()=>{ state.buffConnector.mode='mock'; syncBuffCatalog(); });
+document.getElementById('syncBuffBtn').addEventListener('click',syncBuffCatalog);
+document.getElementById('importBuffJsonBtn').addEventListener('click',()=>document.getElementById('buffJsonFile').click());
+document.getElementById('buffJsonFile').addEventListener('change',e=>{ if(e.target.files[0]) importBuffJson(e.target.files[0]); e.target.value=''; });
+document.getElementById('clearBasketBtn').addEventListener('click',clearBasket);
+document.getElementById('exportBasketBtn').addEventListener('click',exportBasketCsv);
+document.getElementById('buffSearchInput').addEventListener('input',renderBuffCatalog);
+document.getElementById('buffGameFilter').addEventListener('change',renderBuffCatalog);
+document.getElementById('buffLiquidityFilter').addEventListener('change',renderBuffCatalog);
+
+document.getElementById('exportBtn').addEventListener('click',exportJson);
+document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change',e=>{ if(e.target.files[0]) importJson(e.target.files[0]); e.target.value='' });
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  if(!confirm('Точно сбросить все данные?')) return;
+  state=JSON.parse(JSON.stringify(defaultData));
+  saveState();
+  logAction('Выполнен полный сброс данных');
+  render();
+});
+
+document.getElementById('exportCsvBtn').addEventListener('click',exportCsv);
+document.getElementById('importCsvBtn').addEventListener('click',()=>document.getElementById('csvFile').click());
+document.getElementById('csvFile').addEventListener('change',e=>{ if(e.target.files[0]) importCsv(e.target.files[0]); e.target.value='' });
+
+window.addEventListener('click',e=>{
+  if(e.target.id==='missionModal') closeMissionModal();
+  if(e.target.id==='taskModal') closeTaskModal();
+  if(e.target.id==='skinModal') closeSkinModal();
+});
+
+render();
+</script>
+</body>
+</html>
